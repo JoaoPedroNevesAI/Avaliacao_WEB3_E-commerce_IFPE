@@ -4,6 +4,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ProdutosModule } from './modules/produtos/produtos.module';
 import { CategoriasModule } from './modules/categorias/categorias.module';
+import { ClientesModule } from './modules/clientes/clientes.module';
+import { EnderecosModule } from './modules/enderecos/enderecos.module';
+import { PedidosModule } from './modules/pedidos/pedidos.module';
+import { PagamentosModule } from './modules/pagamentos/pagamentos.module';
 
 @Module({
   imports: [
@@ -19,6 +23,10 @@ import { CategoriasModule } from './modules/categorias/categorias.module';
     }),
     ProdutosModule,
     CategoriasModule,
+    ClientesModule,
+    EnderecosModule,
+    PedidosModule,
+    PagamentosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
