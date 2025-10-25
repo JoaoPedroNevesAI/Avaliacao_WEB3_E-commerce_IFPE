@@ -6,8 +6,9 @@ import { ProdutosModule } from './modules/produtos/produtos.module';
 import { CategoriasModule } from './modules/categorias/categorias.module';
 import { ClientesModule } from './modules/clientes/clientes.module';
 import { EnderecosModule } from './modules/enderecos/enderecos.module';
-import { PedidosModule } from './modules/pedidos/pedidos.module';
+import { PedidoModule } from './modules/pedidos/pedidos.module';
 import { PagamentosModule } from './modules/pagamentos/pagamentos.module';
+import { CarrinhoModule } from './modules/carrinho/carrinho.module';
 
 @Module({
   imports: [
@@ -25,8 +26,9 @@ import { PagamentosModule } from './modules/pagamentos/pagamentos.module';
     CategoriasModule,
     ClientesModule,
     EnderecosModule,
-    PedidosModule,
+    PedidoModule,
     PagamentosModule,
+    CarrinhoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

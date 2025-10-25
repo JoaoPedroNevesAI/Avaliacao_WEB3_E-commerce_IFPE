@@ -1,34 +1,18 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
-import { PedidosService } from './pedidos.service';
-import { CreatePedidoDto } from './dto/create-pedido.dto';
-import { UpdatePedidoDto } from './dto/update-pedido.dto';
+import { Controller, Post, Param, Get } from '@nestjs/common';
+import { PedidoService } from './pedidos.service';
+import { Pedido } from './pedido.entity';
 
 @Controller('pedidos')
-export class PedidosController {
-  constructor(private readonly pedidosService: PedidosService) {}
+export class PedidoController {
+  constructor(private readonly pedidosService: PedidoService) {}
 
-  @Get()
-  findAll() {
-    return this.pedidosService.findAll();
+  @Post(':clienteId')
+  async criarPedido(@Param('clienteId') clienteId: number): Promise<Pedido> {
+    return this.pedidosService.criarPedido(clienteId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.pedidosService.findOne(+id);
-  }
-
-  @Post()
-  create(@Body() data: CreatePedidoDto) {
-    return this.pedidosService.create(data);
-  }
-
-  @Put(':id')
-  update(@Param('id') id: string, @Body() data: UpdatePedidoDto) {
-    return this.pedidosService.update(+id, data);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.pedidosService.remove(+id);
+  @Get(':clienteId')
+  async listarPedidos(@Param('clienteId') clienteId: number): Promise<Pedido[]> {
+    return this.pedidosService.listarPedidosDoCliente(clienteId);
   }
 }
