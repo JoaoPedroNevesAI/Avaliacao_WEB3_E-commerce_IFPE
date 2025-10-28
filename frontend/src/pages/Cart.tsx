@@ -1,26 +1,108 @@
 import React from 'react';
+import { useCart } from '../contexts/CartContext';
+import api from '../api/api';
 
-const Cart = () => {
-  const carrinho = [
-    { id: 1, nome: 'Notebook Gamer', preco: 5999.99, quantidade: 1 },
-    { id: 2, nome: 'Mouse Sem Fio', preco: 99.9, quantidade: 2 },
-  ];
+const Cart: React.FC = () => {
+  const { carrinho, removeFromCart, clearCart, finalizarPedido, total } = useCart();
 
-  const total = carrinho.reduce((acc, item) => acc + item.preco * item.quantidade, 0);
+  const handleCheckout = async () => {
+    if (carrinho.length === 0) {
+      alert('O carrinho está vazio.');
+      return;
+    }
+
+    try {
+      const response = await api.post('/pedidos', {
+        clienteId: 1,
+        itens: carrinho.map((item) => ({
+          produtoId: item.id,
+          quantidade: item.quantidade,
+        })),
+      });
+
+      alert(`Pedido criado com sucesso! ID: ${response.data.id}`);
+      finalizarPedido();
+    } catch (error) {
+      console.error('Erro ao criar pedido:', error);
+      alert('Erro ao criar pedido.');
+    }
+  };
 
   return (
-    <main style={{ padding: '2rem' as const }}>
+    <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem' }}>
       <h2>Carrinho de Compras</h2>
-      {carrinho.map((item) => (
-        <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between' as const, marginBottom: '10px' as const }}>
-          <span>{item.nome}</span>
-          <span>Qtd: {item.quantidade}</span>
-          <span>R$ {(item.preco * item.quantidade).toFixed(2)}</span>
-        </div>
-      ))}
-      <h3>Total: R$ {total.toFixed(2)}</h3>
-      <button style={{ padding: '10px 15px' as const, background: '#28a745' as const, color: '#fff' as const, border: 'none', borderRadius: '5px' as const, cursor: 'pointer' as const }}>Ir para Checkout</button>
-    </main>
+
+      {carrinho.length === 0 ? (
+        <p>Seu carrinho está vazio.</p>
+      ) : (
+        <>
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            {carrinho.map((item) => (
+              <li
+                key={item.id}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderBottom: '1px solid #ccc',
+                  padding: '1rem 0',
+                }}
+              >
+                <div>
+                  <strong>{item.nome}</strong> <br />
+                  R$ {item.preco.toFixed(2)} x {item.quantidade}
+                </div>
+                <button
+                  onClick={() => removeFromCart(item.id)}
+                  style={{
+                    background: 'red',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.5rem 1rem',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Remover
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'space-between' }}>
+            <button
+              onClick={clearCart}
+              style={{
+                background: '#666',
+                color: 'white',
+                border: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: 8,
+                cursor: 'pointer',
+              }}
+            >
+              Limpar Carrinho
+            </button>
+
+            <button
+              onClick={handleCheckout}
+              style={{
+                background: '#007bff',
+                color: 'white',
+                border: 'none',
+                padding: '0.5rem 1rem',
+                borderRadius: 8,
+                cursor: 'pointer',
+              }}
+            >
+              Finalizar Pedido
+            </button>
+          </div>
+
+          <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>Total: R$ {total.toFixed(2)}</p>
+        </>
+      )}
+    </div>
   );
 };
 

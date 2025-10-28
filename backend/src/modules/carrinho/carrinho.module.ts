@@ -5,5 +5,6 @@ import { CarrinhoService } from './carrinho.service';
 @Module({
   controllers: [CarrinhoController],
   providers: [CarrinhoService],
+  exports: [CarrinhoService]
 })
 export class CarrinhoModule {}

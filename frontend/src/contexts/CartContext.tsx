@@ -1,77 +1,79 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import axios from 'axios';
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
-interface CartItem {
+export interface Produto {
   id: number;
-  produtoId: number;
   nome: string;
   preco: number;
   quantidade: number;
+  descricao?: string;
 }
 
-interface CartContextType {
-  carrinho: CartItem[];
+interface CartContextData {
+  carrinho: Produto[];
   total: number;
-  addItem: (item: { produtoId: number; nome: string; preco: number; quantidade?: number }) => void;
-  removeItem: (id: number) => void;
+  addToCart: (produto: Produto) => void;
+  removeFromCart: (id: number) => void;
+  clearCart: () => void;
   updateItem: (id: number, quantidade: number) => void;
-  finalizarPedido: () => Promise<any>;
+  finalizarPedido: () => Promise<void>;
 }
 
-const CartContext = createContext<CartContextType>({} as CartContextType);
-
-export const useCart = () => useContext(CartContext);
+const CartContext = createContext<CartContextData>({} as CartContextData);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [carrinho, setCarrinho] = useState<CartItem[]>([]);
-  const [total, setTotal] = useState<number>(0);
+  const [carrinho, setCarrinho] = useState<Produto[]>([]);
 
-  const fetchCart = async () => {
-    const res = await axios.get('http://localhost:3000/carrinho');
-    setCarrinho(res.data);
-    setTotal(res.data.reduce((acc: number, item: CartItem) => acc + item.preco * item.quantidade, 0));
+  const addToCart = (produto: Produto) => {
+    setCarrinho((prev) => {
+      const itemExistente = prev.find((p) => p.id === produto.id);
+      if (itemExistente) {
+        return prev.map((p) =>
+          p.id === produto.id
+            ? { ...p, quantidade: p.quantidade + produto.quantidade }
+            : p
+        );
+      }
+      return [...prev, produto];
+    });
   };
 
-  useEffect(() => {
-    fetchCart();
-  }, []);
-
-  const addItem = async (item: { produtoId: number; nome: string; preco: number; quantidade?: number }) => {
-    await axios.post('http://localhost:3000/carrinho', { ...item, quantidade: item.quantidade || 1 });
-    fetchCart();
+  const removeFromCart = (id: number) => {
+    setCarrinho((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const removeItem = async (id: number) => {
-    await axios.delete(`http://localhost:3000/carrinho/${id}`);
-    fetchCart();
+  const clearCart = () => setCarrinho([]);
+
+  const updateItem = (id: number, quantidade: number) => {
+    setCarrinho((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, quantidade } : p))
+    );
   };
 
-  const updateItem = async (id: number, quantidade: number) => {
-    await axios.put(`http://localhost:3000/carrinho/${id}`, { quantidade });
-    fetchCart();
-  };
+  const total = carrinho.reduce(
+    (acc, item) => acc + item.preco * item.quantidade,
+    0
+  );
 
   const finalizarPedido = async () => {
-    if (carrinho.length === 0) return;
-
-    const pedidoRes = await axios.post('http://localhost:3000/pedidos', {
-      clienteId: 1,
-      itens: carrinho.map(item => ({
-        produtoId: item.produtoId,
-        quantidade: item.quantidade,
-      })),
-    });
-
-    await axios.delete('http://localhost:3000/carrinho/clear');
-    setCarrinho([]);
-    setTotal(0);
-
-    return pedidoRes.data;
+    console.log("Pedido finalizado:", carrinho);
+    clearCart();
   };
 
   return (
-    <CartContext.Provider value={{ carrinho, total, addItem, removeItem, updateItem, finalizarPedido }}>
+    <CartContext.Provider
+      value={{
+        carrinho,
+        total,
+        addToCart,
+        removeFromCart,
+        clearCart,
+        updateItem,
+        finalizarPedido,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
 };
+
+export const useCart = () => useContext(CartContext);

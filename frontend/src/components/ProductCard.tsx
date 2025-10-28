@@ -1,24 +1,43 @@
-import { useCart } from '../contexts/CartContext';
+import React from "react";
+import { useCart } from "../contexts/CartContext";
 
 interface ProductCardProps {
   id: number;
   nome: string;
   preco: number;
-  descricao?: string;
 }
 
 export default function ProductCard({ id, nome, preco }: ProductCardProps) {
-  const { addItem } = useCart();
+  const { addToCart } = useCart();
 
   const handleAddToCart = () => {
-    addItem({ produtoId: id, nome, preco, quantidade: 1 });
+    addToCart({ id, nome, preco, quantidade: 1 });
   };
 
   return (
-    <div className="card">
+    <div
+      style={{
+        border: "1px solid #ddd",
+        padding: "1rem",
+        borderRadius: 8,
+        textAlign: "center",
+      }}
+    >
       <h3>{nome}</h3>
       <p>R$ {preco.toFixed(2)}</p>
-      <button onClick={handleAddToCart}>Adicionar ao Carrinho</button>
+      <button
+        onClick={handleAddToCart}
+        style={{
+          background: "#007bff",
+          color: "#fff",
+          border: "none",
+          padding: "0.5rem 1rem",
+          borderRadius: 4,
+          cursor: "pointer",
+        }}
+      >
+        Adicionar ao Carrinho
+      </button>
     </div>
   );
 }

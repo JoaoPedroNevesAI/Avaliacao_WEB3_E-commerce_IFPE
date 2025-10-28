@@ -1,18 +1,18 @@
-import { Controller, Post, Param, Get } from '@nestjs/common';
-import { PedidoService } from './pedidos.service';
+import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { PedidosService } from './pedidos.service';
 import { Pedido } from './pedido.entity';
 
 @Controller('pedidos')
-export class PedidoController {
-  constructor(private readonly pedidosService: PedidoService) {}
+export class PedidosController {
+  constructor(private readonly pedidosService: PedidosService) {}
 
-  @Post(':clienteId')
-  async criarPedido(@Param('clienteId') clienteId: number): Promise<Pedido> {
+  @Post()
+  async criarPedido(@Body('clienteId') clienteId: number): Promise<Pedido> {
     return this.pedidosService.criarPedido(clienteId);
   }
 
-  @Get(':clienteId')
-  async listarPedidos(@Param('clienteId') clienteId: number): Promise<Pedido[]> {
+  @Get('cliente/:id')
+  async listarPedidosDoCliente(@Param('id') clienteId: number): Promise<Pedido[]> {
     return this.pedidosService.listarPedidosDoCliente(clienteId);
   }
 }
