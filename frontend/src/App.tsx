@@ -9,28 +9,39 @@ import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Payment from './pages/Payment';
 import ProductDetails from './pages/ProductDetails';
-
+import { CartProvider } from './contexts/CartContext';
 
 const App = () => {
   return (
-    <Router>
-      <Header />
-      <nav style={{ display: 'flex' as const, justifyContent: 'center' as const, gap: '15px' as const, margin: '1rem 0' as const }}>
-        <Link to="/">Home</Link>
-        <Link to="/carrinho">Carrinho</Link>
-        <Link to="/checkout">Checkout</Link>
-        <Link to="/pedidos">Pedidos</Link>
-      </nav>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/carrinho" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/pedidos" element={<Orders />} />
-        <Route path="/pagamento" element={<Payment />} />
-        <Route path="/produto/:id" element={<ProductDetails />} />
-      </Routes>
-      <Footer />
-    </Router>
+    <CartProvider>
+      <Router>
+        <Header />
+        <nav
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '15px',
+            margin: '1rem 0',
+          }}
+        >
+          <Link to="/">Home</Link>
+          <Link to="/carrinho">Carrinho</Link>
+          <Link to="/checkout">Checkout</Link>
+          <Link to="/pedidos">Pedidos</Link>
+        </nav>
+
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/carrinho" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/pedidos" element={<Orders />} />
+          <Route path="/pagamento" element={<Payment />} />
+          <Route path="/produto/:id" element={<ProductDetails />} />
+        </Routes>
+
+        <Footer />
+      </Router>
+    </CartProvider>
   );
 };
 

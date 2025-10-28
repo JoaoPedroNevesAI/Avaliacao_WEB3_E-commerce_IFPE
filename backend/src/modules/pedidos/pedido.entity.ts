@@ -1,35 +1,32 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { Cliente } from '../clientes/cliente.entity';
-import { Endereco } from '../enderecos/endereco.entity';
 import { ItemPedido } from './item-pedido.entity';
+import { StatusPedido } from './status-pedido.enum';
+import { Endereco } from '../enderecos/endereco.entity';
 
-export enum StatusPedido {
-  ABERTO = 'ABERTO',
-  AGUARDANDO_PAGAMENTO = 'AGUARDANDO_PAGAMENTO',
-  PAGO = 'PAGO',
-  CANCELADO = 'CANCELADO',
-}
-
-@Entity()
+@Entity('pedidos')
 export class Pedido {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Cliente, (cliente) => cliente.pedidos, { eager: true })
+  @ManyToOne(() => Cliente, (cliente) => cliente.pedidos)
   cliente: Cliente;
 
-  @ManyToOne(() => Endereco, { eager: true })
+  @ManyToOne(() => Endereco, (endereco) => endereco.pedidos, { nullable: true })
   endereco: Endereco;
 
-  @OneToMany(() => ItemPedido, (item) => item.pedido, { cascade: true, eager: true })
+  @OneToMany(() => ItemPedido, (item) => item.pedido, { cascade: true })
   itens: ItemPedido[];
 
-  @Column({ type: 'enum', enum: StatusPedido, default: StatusPedido.ABERTO })
+  @Column({
+    type: 'enum',
+    enum: StatusPedido,
+    default: StatusPedido.ABERTO,
+  })
   status: StatusPedido;
 
-  @Column({ type: 'decimal', default: 0 })
-  total: number;
-
-  @CreateDateColumn()
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   dataCriacao: Date;
 }
+
+export { StatusPedido } from './status-pedido.enum';

@@ -1,22 +1,69 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import api from '../api/api';
 
-const Orders = () => {
-  const pedidos = [
-    { id: 1, status: 'PAGO', total: 6099.89 },
-    { id: 2, status: 'AGUARDANDO PAGAMENTO', total: 299.0 },
-  ];
+interface ItemPedido {
+  id: number;
+  produto: {
+    id: number;
+    nome: string;
+    preco: number;
+  };
+  quantidade: number;
+  subtotal: number;
+}
+
+interface Pedido {
+  id: number;
+  status: string;
+  itens: ItemPedido[];
+}
+
+const Orders: React.FC = () => {
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+
+  useEffect(() => {
+    const fetchPedidos = async () => {
+      try {
+        const response = await api.get('/pedidos/cliente/1');
+        setPedidos(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar pedidos:', error);
+      }
+    };
+
+    fetchPedidos();
+  }, []);
 
   return (
-    <main style={{ padding: '2rem' as const }}>
+    <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem' }}>
       <h2>Meus Pedidos</h2>
-      {pedidos.map((p) => (
-        <div key={p.id} style={{ border: '1px solid #ccc' as const, borderRadius: '8px' as const, padding: '10px' as const, marginBottom: '10px' as const }}>
-          <p><b>Pedido #{p.id}</b></p>
-          <p>Status: {p.status}</p>
-          <p>Total: R$ {p.total.toFixed(2)}</p>
-        </div>
-      ))}
-    </main>
+
+      {pedidos.length === 0 ? (
+        <p>Você ainda não realizou pedidos.</p>
+      ) : (
+        pedidos.map((pedido) => (
+          <div
+            key={pedido.id}
+            style={{
+              border: '1px solid #ccc',
+              borderRadius: '8px',
+              padding: '1rem',
+              marginBottom: '1rem',
+            }}
+          >
+            <h3>Pedido #{pedido.id}</h3>
+            <p>Status: {pedido.status}</p>
+            <ul>
+              {pedido.itens.map((item) => (
+                <li key={item.id}>
+                  {item.produto.nome} - R$ {item.produto.preco.toFixed(2)} x {item.quantidade} = R$ {item.subtotal.toFixed(2)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      )}
+    </div>
   );
 };
 

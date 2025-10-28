@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'ty
 import { Cliente } from '../clientes/cliente.entity';
 import { Pedido } from '../pedidos/pedido.entity';
 
-@Entity()
+@Entity('enderecos')
 export class Endereco {
   @PrimaryGeneratedColumn()
   id: number;
@@ -13,9 +13,6 @@ export class Endereco {
   @Column()
   numero: string;
 
-  @Column({ nullable: true })
-  complemento?: string;
-
   @Column()
   cidade: string;
 
@@ -24,9 +21,6 @@ export class Endereco {
 
   @Column()
   cep: string;
-
-  @Column({ default: false })
-  padrao: boolean;
 
   @ManyToOne(() => Cliente, (cliente) => cliente.enderecos)
   cliente: Cliente;

@@ -1,50 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import ProductCard from '../components/ProductCard';
+import api from '../api/api';
+import { useCart, Produto } from '../contexts/CartContext';
 
-interface Produto {
-  id: number;
-  nome: string;
-  preco: number;
-  descricao?: string;
-  imagem?: string;
-}
-
-const ProductDetails = () => {
+const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [produto, setProduto] = useState<Produto | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
 
   useEffect(() => {
-    if (id) {
-      axios.get<Produto>(`http://localhost:3000/produtos/${id}`)
-        .then((res) => setProduto(res.data))
-        .catch((err) => console.error('Erro ao buscar produto:', err))
-        .finally(() => setLoading(false));
-    }
+    const fetchProduto = async () => {
+      try {
+        const response = await api.get(`/produtos/${id}`);
+        setProduto(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar produto:', error);
+      }
+    };
+
+    fetchProduto();
   }, [id]);
 
-  if (loading) return <p style={{ padding: '2rem' }}>Carregando...</p>;
-  if (!produto) return <p style={{ padding: '2rem' }}>Produto não encontrado.</p>;
+  if (!produto) return <p>Carregando...</p>;
 
   return (
-    <main style={{ textAlign: 'center', padding: '2rem' }}>
-      <img 
-        src={produto.imagem || '/placeholder.png'} 
-        alt={produto.nome} 
-        style={{ width: '300px', height: '300px', objectFit: 'cover', borderRadius: '10px' }}
-      />
+    <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem' }}>
       <h2>{produto.nome}</h2>
-      <p>{produto.descricao}</p>
-      <h3>R$ {produto.preco.toFixed(2)}</h3>
-      <button 
-        style={{ background: '#28a745', color: '#fff', padding: '10px 15px', borderRadius: '5px', border: 'none', marginTop: '15px', cursor: 'pointer' }}
-        onClick={() => alert('Produto adicionado ao carrinho!')}
+      <p>R$ {produto.preco.toFixed(2)}</p>
+      {produto.descricao && <p>{produto.descricao}</p>}
+      <button
+        onClick={() => addToCart(produto)}
+        style={{
+          background: '#007bff',
+          color: 'white',
+          border: 'none',
+          padding: '0.5rem 1rem',
+          borderRadius: '8px',
+          cursor: 'pointer',
+        }}
       >
-        Adicionar ao Carrinho
+        Adicionar ao carrinho
       </button>
-    </main>
+    </div>
   );
 };
 
