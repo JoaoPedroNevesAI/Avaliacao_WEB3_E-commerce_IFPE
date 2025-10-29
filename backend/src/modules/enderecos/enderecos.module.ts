@@ -1,12 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Endereco } from './endereco.entity';
-import { EnderecosController } from './enderecos.controller';
-import { EnderecosService } from './enderecos.service';
+import { Cliente } from '../clientes/cliente.entity';
+import { EnderecoService } from './endereco.service';
+import { EnderecoController } from './endereco.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Endereco])],
-  controllers: [EnderecosController],
-  providers: [EnderecosService],
+  imports: [
+    TypeOrmModule.forFeature([Endereco, Cliente]),
+  ],
+  controllers: [EnderecoController],
+  providers: [EnderecoService],
 })
 export class EnderecosModule {}

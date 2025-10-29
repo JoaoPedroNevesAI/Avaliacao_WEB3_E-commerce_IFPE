@@ -9,15 +9,21 @@ export class Produto {
   @Column()
   nome: string;
 
-  @Column('decimal')
+  @Column('text')
+  descricao: string;
+
+  @Column('decimal', { precision: 10, scale: 2 })
   preco: number;
 
   @Column({ default: 0 })
   estoque: number;
 
-  @ManyToOne(() => Categoria, categoria => categoria.produtos)
+  @ManyToOne(() => Categoria, categoria => categoria.produtos, { nullable: false })
   categoria: Categoria;
 
   @Column({ default: true })
   ativo: boolean;
+
+  @Column({ nullable: true })
+  imagem: string;
 }

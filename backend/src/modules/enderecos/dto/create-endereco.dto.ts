@@ -1,35 +1,26 @@
-import { IsNotEmpty, IsString, IsBoolean, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsBoolean, IsOptional, IsNumber } from 'class-validator';
 
 export class CreateEnderecoDto {
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   rua: string;
 
+  @IsString()
   @IsNotEmpty()
-  @IsString()
-  numero: string;
-
-  @IsOptional()
-  @IsString()
-  complemento?: string;
-
-  @IsNotEmpty()
-  @IsString()
-  bairro: string;
-
-  @IsNotEmpty()
-  @IsString()
   cidade: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   estado: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   cep: string;
 
   @IsOptional()
   @IsBoolean()
-  padrao?: boolean;
+  principal?: boolean;
+
+  @IsNumber()
+  clienteId: number;
 }
