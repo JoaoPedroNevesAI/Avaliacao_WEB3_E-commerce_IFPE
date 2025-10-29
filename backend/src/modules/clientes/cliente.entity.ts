@@ -1,8 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Pedido } from '../pedidos/pedido.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn } from 'typeorm';
 import { Endereco } from '../enderecos/endereco.entity';
 
-@Entity('clientes')
+@Entity()
 export class Cliente {
   @PrimaryGeneratedColumn()
   id: number;
@@ -10,15 +9,18 @@ export class Cliente {
   @Column()
   nome: string;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column()
+  senha: string; // futuramente criptografar
+
+  @Column({ nullable: true })
   telefone: string;
 
-  @OneToMany(() => Pedido, (pedido) => pedido.cliente)
-  pedidos: Pedido[];
+  @CreateDateColumn()
+  dataCadastro: Date;
 
-  @OneToMany(() => Endereco, (endereco) => endereco.cliente)
+  @OneToMany(() => Endereco, endereco => endereco.cliente)
   enderecos: Endereco[];
 }

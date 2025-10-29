@@ -1,17 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Cliente } from '../clientes/cliente.entity';
-import { Pedido } from '../pedidos/pedido.entity';
 
-@Entity('enderecos')
+@Entity()
 export class Endereco {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   rua: string;
-
-  @Column()
-  numero: string;
 
   @Column()
   cidade: string;
@@ -22,9 +18,9 @@ export class Endereco {
   @Column()
   cep: string;
 
-  @ManyToOne(() => Cliente, (cliente) => cliente.enderecos)
-  cliente: Cliente;
+  @Column({ default: false })
+  principal: boolean;
 
-  @OneToMany(() => Pedido, (pedido) => pedido.endereco)
-  pedidos: Pedido[];
+  @ManyToOne(() => Cliente, cliente => cliente.enderecos, { nullable: false })
+  cliente: Cliente;
 }

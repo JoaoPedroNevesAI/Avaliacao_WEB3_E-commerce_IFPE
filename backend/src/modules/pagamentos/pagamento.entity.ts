@@ -2,16 +2,15 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } f
 import { Pedido } from '../pedidos/pedido.entity';
 
 export enum MetodoPagamento {
-  CARTAO = 'Cartão',
-  BOLETO = 'Boleto',
+  CARTAO = 'CARTÃO',
+  BOLETO = 'BOLETO',
   PIX = 'PIX',
 }
 
 export enum StatusPagamento {
-  PENDENTE = 'Pendente',
-  AGUARDANDO_PAGAMENTO = 'AGUARDANDO_PAGAMENTO',
-  PAGO = 'Pago',
-  CANCELADO = 'Cancelado',
+  PENDENTE = 'PENDENTE',
+  PAGO = 'PAGO',
+  CANCELADO = 'CANCELADO',
 }
 
 @Entity()
@@ -19,7 +18,7 @@ export class Pagamento {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Pedido, { eager: true })
+  @ManyToOne(() => Pedido, { nullable: false })
   pedido: Pedido;
 
   @Column({ type: 'enum', enum: MetodoPagamento })
@@ -28,7 +27,7 @@ export class Pagamento {
   @Column({ type: 'enum', enum: StatusPagamento, default: StatusPagamento.PENDENTE })
   status: StatusPagamento;
 
-  @Column({ type: 'decimal' })
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   valor: number;
 
   @CreateDateColumn()

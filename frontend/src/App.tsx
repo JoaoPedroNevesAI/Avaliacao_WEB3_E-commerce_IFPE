@@ -1,47 +1,31 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-
-import Header from './components/Header';
-import Footer from './components/Footer';
-import Home from './pages/Home';
-import Cart from './pages/Cart';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Produtos from './pages/Produtos';
+import ProdutoDetalhes from './pages/ProdutoDetalhes';
+import Carrinho from './pages/Carrinho';
 import Checkout from './pages/Checkout';
-import Orders from './pages/Orders';
-import Payment from './pages/Payment';
-import ProductDetails from './pages/ProductDetails';
-import { CartProvider } from './contexts/CartContext';
+import Pedidos from './pages/Pedidos';
+import Pagamento from './pages/Pagamento';
+import Login from './pages/Login';
+import Navbar from './components/Navbar';
+import { AppProvider } from './context/AppContext';
 
-const App = () => {
+const App: React.FC = () => {
   return (
-    <CartProvider>
+    <AppProvider>
       <Router>
-        <Header />
-        <nav
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '15px',
-            margin: '1rem 0',
-          }}
-        >
-          <Link to="/">Home</Link>
-          <Link to="/carrinho">Carrinho</Link>
-          <Link to="/checkout">Checkout</Link>
-          <Link to="/pedidos">Pedidos</Link>
-        </nav>
-
+        <Navbar />
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/carrinho" element={<Cart />} />
+          <Route path="/produtos" element={<Produtos />} />
+          <Route path="/produtos/:id" element={<ProdutoDetalhes />} />
+          <Route path="/carrinho" element={<Carrinho />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/pedidos" element={<Orders />} />
-          <Route path="/pagamento" element={<Payment />} />
-          <Route path="/produto/:id" element={<ProductDetails />} />
+          <Route path="/pedidos" element={<Pedidos />} />
+          <Route path="/pagamento/:id" element={<Pagamento />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
-
-        <Footer />
       </Router>
-    </CartProvider>
+    </AppProvider>
   );
 };
 

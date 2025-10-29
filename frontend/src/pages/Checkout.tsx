@@ -1,63 +1,65 @@
-import React from 'react';
-import { useCart } from '../contexts/CartContext';
+import { useState, useEffect } from 'react';
+import { Container, Typography, Stack, Button, List, ListItem, ListItemText } from '@mui/material';
+import { criarPedido } from '../api/api';
+import { useNavigate } from 'react-router-dom';
 
-const Checkout: React.FC = () => {
-  const { carrinho, total, updateItem, removeFromCart } = useCart();
+interface ItemCarrinho {
+  produtoId: number;
+  nome: string;
+  quantidade: number;
+  preco: number;
+}
+
+interface Carrinho {
+  itens: ItemCarrinho[];
+}
+
+const Checkout = () => {
+  const [carrinho, setCarrinho] = useState<Carrinho>({ itens: [] });
+  const navigate = useNavigate();
+
+  const total = carrinho.itens.reduce((acc, item) => acc + item.preco * item.quantidade, 0);
+
+  const handleCriarPedido = async () => {
+    if (carrinho.itens.length === 0) {
+      alert('Carrinho vazio');
+      return;
+    }
+
+    try {
+      await criarPedido({
+        itens: carrinho.itens.map(item => ({
+          produtoId: item.produtoId,
+          quantidade: item.quantidade,
+        })),
+      });
+      alert('Pedido criado com sucesso!');
+      setCarrinho({ itens: [] });
+      navigate('/pagamento/1'); 
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao criar pedido');
+    }
+  };
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem' }}>
-      <h2>Checkout</h2>
-
-      {carrinho.length === 0 ? (
-        <p>Seu carrinho está vazio.</p>
-      ) : (
-        <>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {carrinho.map((item) => (
-              <li
-                key={item.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  borderBottom: '1px solid #ccc',
-                  padding: '1rem 0',
-                }}
-              >
-                <div>
-                  <strong>{item.nome}</strong> <br />
-                  R$ {item.preco.toFixed(2)}
-                </div>
-                <div>
-                  <input
-                    type="number"
-                    value={item.quantidade}
-                    min={1}
-                    onChange={(e) => updateItem(item.id, Number(e.target.value))}
-                    style={{ width: '60px', marginRight: '1rem' }}
-                  />
-                  <button
-                    onClick={() => removeFromCart(item.id)}
-                    style={{
-                      background: 'red',
-                      color: 'white',
-                      border: 'none',
-                      padding: '0.5rem 1rem',
-                      borderRadius: 8,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Remover
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-
-          <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>Total: R$ {total.toFixed(2)}</p>
-        </>
-      )}
-    </div>
+    <Container sx={{ mt: 4 }}>
+      <Typography variant="h4" sx={{ mb: 2 }}>Checkout</Typography>
+      <List>
+        {carrinho.itens.map(item => (
+          <ListItem key={item.produtoId}>
+            <ListItemText
+              primary={`${item.nome} x ${item.quantidade}`}
+              secondary={`R$ ${item.preco * item.quantidade}`}
+            />
+          </ListItem>
+        ))}
+      </List>
+      <Typography variant="h6" sx={{ mt: 2 }}>Total: R$ {total}</Typography>
+      <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+        <Button variant="contained" onClick={handleCriarPedido}>Finalizar Pedido</Button>
+      </Stack>
+    </Container>
   );
 };
 
