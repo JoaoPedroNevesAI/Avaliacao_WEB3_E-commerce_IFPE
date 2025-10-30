@@ -4,23 +4,23 @@ import { Cliente } from '../clientes/cliente.entity';
 @Entity()
 export class Endereco {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  rua: string;
+  rua!: string;
 
   @Column()
-  cidade: string;
+  cidade!: string;
 
   @Column()
-  estado: string;
+  estado!: string;
 
   @Column()
-  cep: string;
+  cep!: string;
 
   @Column({ default: false })
-  principal: boolean;
+  principal!: boolean;
 
   @ManyToOne(() => Cliente, cliente => cliente.enderecos, { nullable: false })
-  cliente: Cliente;
+  cliente!: Cliente;
 }

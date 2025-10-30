@@ -4,23 +4,23 @@ import { Endereco } from '../enderecos/endereco.entity';
 @Entity()
 export class Cliente {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  nome: string;
+  nome!: string;
 
   @Column({ unique: true })
-  email: string;
+  email!: string;
 
   @Column()
-  senha: string; // futuramente criptografar
+  senha!: string;
 
   @Column({ nullable: true })
-  telefone: string;
+  telefone!: string;
 
   @CreateDateColumn()
-  dataCadastro: Date;
+  dataCadastro!: Date;
 
   @OneToMany(() => Endereco, endereco => endereco.cliente)
-  enderecos: Endereco[];
+  enderecos!: Endereco[];
 }

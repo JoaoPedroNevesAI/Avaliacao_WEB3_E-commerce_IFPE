@@ -2,17 +2,17 @@ import { IsNumber, IsArray, ArrayMinSize } from 'class-validator';
 
 export class ItemPedidoDto {
   @IsNumber()
-  produtoId: number;
+  produtoId!: number;
 
   @IsNumber()
-  quantidade: number;
+  quantidade!: number;
 }
 
 export class CreatePedidoDto {
   @IsNumber()
-  clienteId: number;
+  clienteId!: number;
 
   @IsArray()
   @ArrayMinSize(1)
-  itens: ItemPedidoDto[];
+  itens!: ItemPedidoDto[];
 }

@@ -2,8 +2,8 @@ import { IsString } from 'class-validator';
 
 export class CreateCategoriaDto {
   @IsString()
-  nome: string;
+  nome!: string;
 
   @IsString()
-  descricao: string;
+  descricao!: string;
 }

@@ -3,22 +3,22 @@ import { IsString, IsNotEmpty, IsNumber, Min, IsOptional, IsBoolean } from 'clas
 export class CreateProdutoDto {
   @IsString()
   @IsNotEmpty()
-  nome: string;
+  nome!: string;
 
   @IsString()
   @IsNotEmpty()
-  descricao: string;
+  descricao!: string;
 
   @IsNumber()
   @Min(0)
-  preco: number;
+  preco!: number;
 
   @IsNumber()
   @Min(0)
-  estoque: number;
+  estoque!: number;
 
   @IsNumber()
-  categoriaId: number;
+  categoriaId!: number;
 
   @IsOptional()
   @IsString()

@@ -5,20 +5,20 @@ import { Produto } from '../produtos/produto.entity';
 @Entity()
 export class ItemPedido {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @ManyToOne(() => Pedido, pedido => pedido.itens, { nullable: false })
-  pedido: Pedido;
+  pedido!: Pedido;
 
   @ManyToOne(() => Produto, { nullable: false })
-  produto: Produto;
+  produto!: Produto;
 
   @Column()
-  quantidade: number;
+  quantidade!: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
-  precoUnitario: number;
+  precoUnitario!: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
-  subtotal: number;
+  subtotal!: number;
 }

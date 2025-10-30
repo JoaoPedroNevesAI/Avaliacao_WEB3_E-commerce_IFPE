@@ -1,25 +1,32 @@
 import { useEffect, useState } from 'react';
-import { getPedidos } from '../api/api';
-import { Container, Typography, List, ListItem } from '@mui/material';
+import axios from 'axios';
+
+interface Pedido {
+  id: number;
+  cliente: string;
+  total: number;
+}
 
 const Pedidos = () => {
-  const [pedidos, setPedidos] = useState<any[]>([]);
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
 
   useEffect(() => {
-    getPedidos().then(res => setPedidos(res.data));
+    axios.get<Pedido[]>('http://localhost:3000/pedidos')
+      .then(res => setPedidos(res.data))
+      .catch(err => console.error(err));
   }, []);
 
   return (
-    <Container sx={{ marginTop: 2 }}>
-      <Typography variant="h4" sx={{ mb: 2 }}>Pedidos</Typography>
-      <List>
-        {pedidos.map(p => (
-          <ListItem key={p.id}>
-            Pedido {p.id} - Total: R$ {p.total} - Status: {p.status}
-          </ListItem>
+    <div>
+      <h2>Pedidos</h2>
+      <ul>
+        {pedidos.map(pedido => (
+          <li key={pedido.id}>
+            {pedido.cliente} - R$ {pedido.total}
+          </li>
         ))}
-      </List>
-    </Container>
+      </ul>
+    </div>
   );
 };
 

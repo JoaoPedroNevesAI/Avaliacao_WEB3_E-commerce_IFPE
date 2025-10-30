@@ -4,26 +4,26 @@ import { Categoria } from '../categorias/categoria.entity';
 @Entity()
 export class Produto {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  nome: string;
+  nome!: string;
 
   @Column('text')
-  descricao: string;
+  descricao!: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
-  preco: number;
+  preco!: number;
 
   @Column({ default: 0 })
-  estoque: number;
+  estoque!: number;
 
   @ManyToOne(() => Categoria, categoria => categoria.produtos, { nullable: false })
-  categoria: Categoria;
+  categoria!: Categoria;
 
   @Column({ default: true })
-  ativo: boolean;
+  ativo!: boolean;
 
   @Column({ nullable: true })
-  imagem: string;
+  imagem!: string;
 }
