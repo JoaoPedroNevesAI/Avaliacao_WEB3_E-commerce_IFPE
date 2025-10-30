@@ -3,11 +3,11 @@ import { MetodoPagamento } from '../pagamento.entity';
 
 export class CreatePagamentoDto {
   @IsNumber()
-  pedidoId: number;
+  pedidoId!: number;
 
   @IsEnum(MetodoPagamento)
-  metodo: MetodoPagamento;
+  metodo!: MetodoPagamento;
 
   @IsNumber()
-  valor: number;
+  valor!: number;
 }

@@ -12,26 +12,26 @@ export enum StatusPedido {
 @Entity()
 export class Pedido {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @ManyToOne(() => Cliente, cliente => cliente.enderecos, { nullable: false })
-  cliente: Cliente;
+  cliente!: Cliente;
 
   @OneToMany(() => ItemPedido, item => item.pedido, { cascade: true })
-  itens: ItemPedido[];
+  itens!: ItemPedido[];
 
   @Column({ type: 'enum', enum: StatusPedido, default: StatusPedido.ABERTO })
-  status: StatusPedido;
+  status!: StatusPedido;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  subtotal: number;
+  subtotal!: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  total: number;
+  total!: number;
 
   @Column({ default: 0 })
-  quantidadeTotal: number;
+  quantidadeTotal!: number;
 
   @CreateDateColumn()
-  dataCriacao: Date;
+  dataCriacao!: Date;
 }

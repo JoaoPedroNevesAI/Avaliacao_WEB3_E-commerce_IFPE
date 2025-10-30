@@ -2,6 +2,7 @@ import { Controller, Get, Post, Patch, Delete, Param, Body, ParseIntPipe } from 
 import { ClienteService } from './cliente.service';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
+import { LoginDto } from './dto/login.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('clientes')
@@ -32,5 +33,10 @@ export class ClienteController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.clienteService.remove(id);
+  }
+
+  @Post('login')
+  login(@Body() dto: LoginDto) {
+    return this.clienteService.login(dto);
   }
 }

@@ -6,9 +6,8 @@ import Carrinho from './pages/Carrinho';
 import Checkout from './pages/Checkout';
 import Pedidos from './pages/Pedidos';
 import Pagamento from './pages/Pagamento';
-import Login from './pages/Login';
 import Navbar from './components/Navbar';
-import { AppProvider } from './context/AppContext';
+import { AppProvider } from './context/UseAppContext';
 
 const App: React.FC = () => {
   return (
@@ -16,13 +15,13 @@ const App: React.FC = () => {
       <Router>
         <Navbar />
         <Routes>
+          <Route path="/" element={<Produtos />} />
           <Route path="/produtos" element={<Produtos />} />
           <Route path="/produtos/:id" element={<ProdutoDetalhes />} />
           <Route path="/carrinho" element={<Carrinho />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/pedidos" element={<Pedidos />} />
           <Route path="/pagamento/:id" element={<Pagamento />} />
-          <Route path="/login" element={<Login />} />
         </Routes>
       </Router>
     </AppProvider>

@@ -16,20 +16,20 @@ export enum StatusPagamento {
 @Entity()
 export class Pagamento {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @ManyToOne(() => Pedido, { nullable: false })
-  pedido: Pedido;
+  pedido!: Pedido;
 
   @Column({ type: 'enum', enum: MetodoPagamento })
-  metodo: MetodoPagamento;
+  metodo!: MetodoPagamento;
 
   @Column({ type: 'enum', enum: StatusPagamento, default: StatusPagamento.PENDENTE })
-  status: StatusPagamento;
+  status!: StatusPagamento;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
-  valor: number;
+  valor!: number;
 
   @CreateDateColumn()
-  data: Date;
+  data!: Date;
 }

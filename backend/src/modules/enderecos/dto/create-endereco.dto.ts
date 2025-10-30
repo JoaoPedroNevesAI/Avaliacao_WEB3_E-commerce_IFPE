@@ -3,24 +3,24 @@ import { IsString, IsNotEmpty, IsBoolean, IsOptional, IsNumber } from 'class-val
 export class CreateEnderecoDto {
   @IsString()
   @IsNotEmpty()
-  rua: string;
+  rua!: string;
 
   @IsString()
   @IsNotEmpty()
-  cidade: string;
+  cidade!: string;
 
   @IsString()
   @IsNotEmpty()
-  estado: string;
+  estado!: string;
 
   @IsString()
   @IsNotEmpty()
-  cep: string;
+  cep!: string;
 
   @IsOptional()
   @IsBoolean()
   principal?: boolean;
 
   @IsNumber()
-  clienteId: number;
+  clienteId!: number;
 }

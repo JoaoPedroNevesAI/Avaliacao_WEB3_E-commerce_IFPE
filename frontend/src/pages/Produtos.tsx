@@ -1,63 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { Grid, Card, CardContent, Typography, Button, CircularProgress } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-
-interface Produto {
-  id: number;
-  nome: string;
-  preco: number;
-  estoque: number;
-  ativo: boolean;
-  categoria: {
-    id: number;
-    nome: string;
-  };
-}
+import React from 'react';
+import { useAppContext, Produto } from '../context/UseAppContext';
 
 const Produtos: React.FC = () => {
-  const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchProdutos = async () => {
-      try {
-        const response = await axios.get<Produto[]>('http://localhost:3000/produtos');
-        setProdutos(response.data.filter(p => p.ativo));
-      } catch (error) {
-        console.error('Erro ao buscar produtos:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProdutos();
-  }, []);
-
-  if (loading) return <CircularProgress />;
+  const { produtos, adicionarAoCarrinho } = useAppContext();
 
   return (
-    <Grid container spacing={3}>
-      {produtos.map(produto => (
-        <Grid item key={produto.id} xs={12} sm={6} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">{produto.nome}</Typography>
-              <Typography>Categoria: {produto.categoria.nome}</Typography>
-              <Typography>R$ {produto.preco.toFixed(2)}</Typography>
-              <Button
-                disabled={produto.estoque === 0}
-                onClick={() => navigate(`/produtos/${produto.id}`)}
-                variant="contained"
-                sx={{ mt: 1 }}
-              >
-                {produto.estoque === 0 ? 'Indisponível' : 'Ver Detalhes'}
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
+    <div style={{ maxWidth: 800, margin: '20px auto' }}>
+      <h1>Produtos</h1>
+      {produtos.length === 0 && <p>Nenhum produto encontrado.</p>}
+      <ul style={{ listStyle: 'none', padding: 0 }}>
+        {produtos.map((produto: Produto) => (
+          <li
+            key={produto.id}
+            style={{ border: '1px solid #ccc', padding: 20, marginBottom: 10 }}
+          >
+            <h3>{produto.nome}</h3>
+            <p>{produto.descricao}</p>
+            <p>Preço: R$ {produto.preco.toFixed(2)}</p>
+            <button onClick={() => adicionarAoCarrinho(produto)}>Adicionar ao carrinho</button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 };
 
