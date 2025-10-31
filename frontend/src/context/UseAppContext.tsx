@@ -1,10 +1,16 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+export type Categoria = {
+  id: number;
+  nome: string;
+};
 
 export type Produto = {
   id: number;
   nome: string;
+  preco: number | string;
   descricao?: string;
-  preco: number;
+  categoria: Categoria;
 };
 
 export type Usuario = {
@@ -17,8 +23,8 @@ export type AppContextType = {
   produtos: Produto[];
   setProdutos: (produtos: Produto[]) => void;
   carrinho: Produto[];
-  adicionarAoCarrinho: (produto: Produto) => void;
   usuario: Usuario | null;
+  adicionarAoCarrinho: (produto: Produto) => void;
   setUsuario: (usuario: Usuario | null) => void;
 };
 
@@ -36,22 +42,30 @@ export const AppProvider = ({ children }: Props) => {
   };
 
   useEffect(() => {
-    const fetchProdutos = async () => {
+    const carregarProdutos = async () => {
       try {
         const res = await fetch('http://localhost:3000/produtos');
         if (!res.ok) throw new Error('Erro ao buscar produtos');
         const data: Produto[] = await res.json();
         setProdutos(data);
       } catch (err) {
-        console.error(err);
+        console.error('Erro ao carregar produtos:', err);
       }
     };
-    fetchProdutos();
+
+    carregarProdutos();
   }, []);
 
   return (
     <AppContext.Provider
-      value={{ produtos, setProdutos, carrinho, adicionarAoCarrinho, usuario, setUsuario }}
+      value={{
+        produtos,
+        setProdutos,
+        carrinho,
+        usuario,
+        setUsuario,
+        adicionarAoCarrinho,
+      }}
     >
       {children}
     </AppContext.Provider>
