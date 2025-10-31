@@ -1,31 +1,32 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { useAppContext, Pedido } from '../context/AppContext';
 
-interface Pedido {
-  id: number;
-  cliente: string;
-  total: number;
-}
-
-const Pedidos = () => {
-  const [pedidos, setPedidos] = useState<Pedido[]>([]);
-
-  useEffect(() => {
-    axios.get<Pedido[]>('http://localhost:3000/pedidos')
-      .then(res => setPedidos(res.data))
-      .catch(err => console.error(err));
-  }, []);
+const Pedidos: React.FC = () => {
+  const { pedidos } = useAppContext();
 
   return (
-    <div>
-      <h2>Pedidos</h2>
-      <ul>
-        {pedidos.map(pedido => (
-          <li key={pedido.id}>
-            {pedido.cliente} - R$ {pedido.total}
-          </li>
-        ))}
-      </ul>
+    <div style={{ maxWidth: 800, margin: '20px auto' }}>
+      <h1>Meus Pedidos</h1>
+      {pedidos.length === 0 ? (
+        <p>Você ainda não fez nenhum pedido.</p>
+      ) : (
+        pedidos.map((pedido: Pedido) => (
+          <div key={pedido.id} style={{ border: '1px solid #ccc', padding: 20, marginBottom: 20 }}>
+            <h3>Pedido #{pedido.id}</h3>
+            <p>Data: {pedido.data}</p>
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {pedido.itens.map(item => (
+                <li key={item.id}>
+                  {item.nome} - {item.quantidade} x R$ {Number(item.preco).toFixed(2)} = R$ {(
+                    Number(item.preco) * item.quantidade
+                  ).toFixed(2)}
+                </li>
+              ))}
+            </ul>
+            <h4>Total: R$ {pedido.total.toFixed(2)}</h4>
+          </div>
+        ))
+      )}
     </div>
   );
 };

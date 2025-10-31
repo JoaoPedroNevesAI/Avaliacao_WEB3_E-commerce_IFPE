@@ -1,34 +1,26 @@
-import { useContext } from 'react';
-import { AppContext, Produto } from '../context/AppContext';
-import { Container, Typography, Button, Box } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { useAppContext, ProdutoCarrinho } from '../context/AppContext';
 
-const ProdutoDetalhes = () => {
+const ProdutoDetalhes: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const context = useContext(AppContext);
-  const navigate = useNavigate();
+  const { produtos, adicionarAoCarrinho } = useAppContext();
 
-  if (!context) return null;
+  const produto = produtos.find(p => p.id === Number(id));
+  if (!produto) return <p>Produto não encontrado.</p>;
 
-  const produto: Produto | undefined = context.produtos.find(p => p.id === Number(id));
-  if (!produto) return <Typography>Produto não encontrado</Typography>;
-
-  const adicionarCarrinho = () => {
-    context.adicionarAoCarrinho(produto);
-    navigate('/carrinho');
+  const handleAdicionar = () => {
+    adicionarAoCarrinho({ ...produto, quantidade: 1 } as ProdutoCarrinho);
+    alert(`Produto "${produto.nome}" adicionado ao carrinho!`);
   };
 
   return (
-    <Container sx={{ marginTop: 2 }}>
-      <Typography variant="h4" sx={{ mb: 2 }}>{produto.nome}</Typography>
-      <Typography variant="h6" sx={{ mb: 2 }}>R$ {produto.preco}</Typography>
-      <Typography sx={{ mb: 2 }}>{produto.descricao}</Typography>
-      <Box>
-        <Button variant="contained" onClick={adicionarCarrinho}>
-          Adicionar ao Carrinho
-        </Button>
-      </Box>
-    </Container>
+    <div style={{ maxWidth: 800, margin: '20px auto' }}>
+      <h1>{produto.nome}</h1>
+      <p>{produto.descricao}</p>
+      <p>Preço: R$ {Number(produto.preco).toFixed(2)}</p>
+      <button onClick={handleAdicionar}>Adicionar ao carrinho</button>
+    </div>
   );
 };
 
