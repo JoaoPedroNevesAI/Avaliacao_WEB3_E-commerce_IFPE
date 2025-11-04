@@ -12,7 +12,11 @@ export class Produto {
   @Column('text')
   descricao!: string;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', {precision: 10,scale: 2,transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
+  })
   preco!: number;
 
   @Column({ default: 0 })
@@ -27,3 +31,4 @@ export class Produto {
   @Column({ nullable: true })
   imagem!: string;
 }
+
