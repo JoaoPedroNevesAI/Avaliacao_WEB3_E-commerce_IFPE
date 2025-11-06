@@ -5,8 +5,9 @@ import Produtos from './pages/Produtos';
 import Carrinho from './pages/Carrinho';
 import Pedidos from './pages/Pedidos';
 import Navbar from './components/Navbar';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { Toaster } from 'react-hot-toast';
+import Pagamento from './pages/Pagamento';
+
 
 const App: React.FC = () => {
   return (
@@ -18,9 +19,10 @@ const App: React.FC = () => {
           <Route path="/produtos" element={<Produtos />} />
           <Route path="/carrinho" element={<Carrinho />} />
           <Route path="/pedidos" element={<Pedidos />} />
+          <Route path="/pagamento" element={<Pagamento />} />
         </Routes>
       </Router>
-      <ToastContainer position="top-right" autoClose={2000} hideProgressBar />
+      <Toaster position="top-right" toastOptions={{ duration: 2000 }} />
     </AppProvider>
   );
 };
