@@ -1,138 +1,152 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
-export type Produto = {
+type Produto = {
   id: number;
   nome: string;
   preco: number;
   descricao?: string;
+  categoria?: string | { id: number; nome: string };
 };
 
-export type ProdutoCarrinho = Produto & {
+export interface ProdutoCarrinho extends Produto {
   quantidade: number;
-};
+}
 
-export type Usuario = {
-  id: number;
-  nome: string;
-  email: string;
-};
-
-export type Pedido = {
+export interface Pedido {
   id: number;
   data: string;
   itens: ProdutoCarrinho[];
   total: number;
-};
+  formaPagamento: string;
+  status: string;
+}
 
-export type AppContextType = {
+export interface AppContextType {
   produtos: Produto[];
-  setProdutos: (produtos: Produto[]) => void;
   carrinho: ProdutoCarrinho[];
-  usuario: Usuario | null;
   pedidos: Pedido[];
   adicionarAoCarrinho: (produto: Produto) => void;
-  removerDoCarrinho: (produtoId: number) => void;
-  aumentarQuantidade: (produtoId: number) => void;
-  diminuirQuantidade: (produtoId: number) => void;
-  finalizarCompra: () => void;
-  setUsuario: (usuario: Usuario | null) => void;
-};
+  removerDoCarrinho: (id: number) => void;
+  aumentarQuantidade: (id: number) => void;
+  diminuirQuantidade: (id: number) => void;
+  limparCarrinho: () => void;
+  finalizarPedido: (formaPagamento: string) => void;
+  cancelarPedido: (id: number) => void;
+}
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-type Props = { children: ReactNode };
+export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [produtos] = useState<Produto[]>([
+    { id: 1, nome: 'Camiseta React', descricao: 'Camiseta estilosa de React', preco: 79.9 },
+    { id: 2, nome: 'Caneca TypeScript', descricao: 'Caneca para devs TypeScript', preco: 49.9 },
+    { id: 3, nome: 'Adesivo JavaScript', descricao: 'Adesivo para seu notebook', preco: 9.9 },
+  ]);
 
-export const AppProvider = ({ children }: Props) => {
-  const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [carrinho, setCarrinho] = useState<ProdutoCarrinho[]>([]);
-  const [usuario, setUsuario] = useState<Usuario | null>(null);
-  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [carrinho, setCarrinho] = useState<ProdutoCarrinho[]>(() => {
+    const saved = localStorage.getItem('carrinho');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [pedidos, setPedidos] = useState<Pedido[]>(() => {
+    const saved = localStorage.getItem('pedidos');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('carrinho', JSON.stringify(carrinho));
+  }, [carrinho]);
+
+  useEffect(() => {
+    localStorage.setItem('pedidos', JSON.stringify(pedidos));
+  }, [pedidos]);
 
   const adicionarAoCarrinho = (produto: Produto) => {
     setCarrinho(prev => {
-      const existente = prev.find(item => item.id === produto.id);
+      const existente = prev.find(p => p.id === produto.id);
       if (existente) {
-        return prev.map(item =>
-          item.id === produto.id ? { ...item, quantidade: item.quantidade + 1 } : item
+        toast.success(`Quantidade aumentada: ${produto.nome}`);
+        return prev.map(p =>
+          p.id === produto.id ? { ...p, quantidade: p.quantidade + 1 } : p
         );
-      } else {
-        return [...prev, { ...produto, quantidade: 1 }];
       }
+      toast.success(`Adicionado ao carrinho: ${produto.nome}`);
+      return [...prev, { ...produto, quantidade: 1 }];
     });
-    toast.success(`${produto.nome} adicionado ao carrinho!`, { duration: 2000 });
   };
 
-  const removerDoCarrinho = (produtoId: number) => {
-    const itemRemovido = carrinho.find(item => item.id === produtoId);
-    setCarrinho(prev => prev.filter(item => item.id !== produtoId));
-    if (itemRemovido) toast.success(`${itemRemovido.nome} removido do carrinho!`, { duration: 2000 });
+  const removerDoCarrinho = (id: number) => {
+    const removido = carrinho.find(p => p.id === id);
+    if (removido) toast.error(`Removido do carrinho: ${removido.nome}`);
+    setCarrinho(prev => prev.filter(p => p.id !== id));
   };
 
-  const aumentarQuantidade = (produtoId: number) => {
+  const aumentarQuantidade = (id: number) => {
     setCarrinho(prev =>
-      prev.map(item =>
-        item.id === produtoId ? { ...item, quantidade: item.quantidade + 1 } : item
-      )
+      prev.map(p => (p.id === id ? { ...p, quantidade: p.quantidade + 1 } : p))
     );
   };
 
-  const diminuirQuantidade = (produtoId: number) => {
+  const diminuirQuantidade = (id: number) => {
     setCarrinho(prev =>
       prev
-        .map(item =>
-          item.id === produtoId
-            ? { ...item, quantidade: Math.max(1, item.quantidade - 1) }
-            : item
-        )
+        .map(p => (p.id === id ? { ...p, quantidade: p.quantidade - 1 } : p))
+        .filter(p => p.quantidade > 0)
     );
   };
 
-  const finalizarCompra = () => {
+  const limparCarrinho = () => {
+    setCarrinho([]);
+  };
+
+  const finalizarPedido = (formaPagamento: string) => {
     if (carrinho.length === 0) {
-      toast.error('O carrinho está vazio!', { duration: 2000 });
+      toast.error('Carrinho vazio!');
       return;
     }
-    const total = carrinho.reduce((acc, item) => acc + item.preco * item.quantidade, 0);
+
+    const total = carrinho.reduce(
+      (acc, item) => acc + item.preco * item.quantidade,
+      0
+    );
+
     const novoPedido: Pedido = {
       id: pedidos.length + 1,
       data: new Date().toLocaleString(),
-      itens: [...carrinho],
+      itens: carrinho,
       total,
+      formaPagamento,
+      status: 'Aguardando Pagamento',
     };
+
     setPedidos(prev => [...prev, novoPedido]);
     setCarrinho([]);
-    toast.success('Compra finalizada com sucesso!', { duration: 2000 });
+    toast.success('Pedido finalizado com sucesso!');
   };
 
-  useEffect(() => {
-    const carregarProdutos = async () => {
-      try {
-        const res = await fetch('http://localhost:3000/produtos');
-        if (!res.ok) throw new Error('Erro ao buscar produtos');
-        const data: Produto[] = await res.json();
-        setProdutos(data);
-      } catch (err) {
-        console.error('Erro ao carregar produtos:', err);
-      }
-    };
-    carregarProdutos();
-  }, []);
+  const cancelarPedido = (id: number) => {
+    setPedidos(prev =>
+      prev.map(p =>
+        p.id === id ? { ...p, status: 'Cancelado' } : p
+      )
+    );
+    toast.error('Pedido cancelado!');
+  };
 
   return (
     <AppContext.Provider
       value={{
         produtos,
-        setProdutos,
         carrinho,
-        usuario,
-        setUsuario,
         pedidos,
         adicionarAoCarrinho,
         removerDoCarrinho,
         aumentarQuantidade,
         diminuirQuantidade,
-        finalizarCompra,
+        limparCarrinho,
+        finalizarPedido,
+        cancelarPedido,
       }}
     >
       {children}
@@ -140,8 +154,8 @@ export const AppProvider = ({ children }: Props) => {
   );
 };
 
-export const useAppContext = () => {
+export const useAppContext = (): AppContextType => {
   const context = useContext(AppContext);
-  if (!context) throw new Error('useAppContext precisa estar dentro de um AppProvider');
+  if (!context) throw new Error('useAppContext deve ser usado dentro de um AppProvider');
   return context;
 };

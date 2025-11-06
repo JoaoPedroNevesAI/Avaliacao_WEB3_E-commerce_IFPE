@@ -11,7 +11,6 @@ const ProdutoDetalhes: React.FC = () => {
 
   const handleAdicionar = () => {
     adicionarAoCarrinho({ ...produto, quantidade: 1 } as ProdutoCarrinho);
-    alert(`Produto "${produto.nome}" adicionado ao carrinho!`);
   };
 
   return (
