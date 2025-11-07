@@ -75,7 +75,12 @@ export class ProdutoService {
       throw new BadRequestException('Categoria inválida');
     }
 
-    const produto = this.produtoRepo.create({ ...dto, categoria });
+    const produto = this.produtoRepo.create({
+      ...dto,
+      estoque: dto.estoque ?? 0,
+      categoria,
+    });
+
     return this.produtoRepo.save(produto);
   }
 
@@ -99,5 +104,33 @@ export class ProdutoService {
   async remove(id: number) {
     const produto = await this.findOne(id);
     return this.produtoRepo.remove(produto);
+  }
+
+  async verificarEstoque(id: number) {
+    const produto = await this.findOne(id);
+    if (produto.estoque <= 0) {
+      throw new BadRequestException('Produto sem estoque');
+    }
+    return { id: produto.id, nome: produto.nome, estoque: produto.estoque };
+  }
+
+  async reduzirEstoque(id: number, quantidade: number) {
+    if (!quantidade || quantidade <= 0) {
+      throw new BadRequestException('Quantidade inválida');
+    }
+
+    const produto = await this.findOne(id);
+
+    if (produto.estoque < quantidade) {
+      throw new BadRequestException('Estoque insuficiente');
+    }
+
+    produto.estoque -= quantidade;
+    await this.produtoRepo.save(produto);
+
+    return {
+      message: `Estoque atualizado com sucesso. Novo estoque: ${produto.estoque}`,
+      novoEstoque: produto.estoque,
+    };
   }
 }

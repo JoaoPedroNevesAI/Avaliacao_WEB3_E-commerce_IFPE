@@ -8,6 +8,8 @@ import {
   Body,
   Query,
   ParseIntPipe,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ProdutoService } from './produto.service';
 import { CreateProdutoDto } from './dto/create-produto.dto';
@@ -55,5 +57,39 @@ export class ProdutoController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.produtoService.remove(id);
+  }
+
+  @Get(':id/estoque')
+  async verificarEstoque(@Param('id', ParseIntPipe) id: number) {
+    const produto = await this.produtoService.findOne(id);
+    if (!produto) throw new NotFoundException('Produto não encontrado');
+    if (produto.estoque <= 0)
+      throw new BadRequestException('Produto sem estoque');
+    return { disponivel: true, estoque: produto.estoque };
+  }
+
+  @Patch(':id/reduzir-estoque')
+  async reduzirEstoque(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('quantidade') quantidade: number,
+  ) {
+    if (!quantidade || quantidade <= 0) {
+      throw new BadRequestException('Quantidade inválida');
+    }
+
+    const produto = await this.produtoService.findOne(id);
+    if (!produto) throw new NotFoundException('Produto não encontrado');
+
+    if (produto.estoque < quantidade) {
+      throw new BadRequestException('Estoque insuficiente');
+    }
+
+    const novoEstoque = produto.estoque - quantidade;
+    await this.produtoService.update(id, { estoque: novoEstoque });
+
+    return {
+      message: `Estoque atualizado com sucesso! Novo estoque: ${novoEstoque}`,
+      novoEstoque,
+    };
   }
 }
