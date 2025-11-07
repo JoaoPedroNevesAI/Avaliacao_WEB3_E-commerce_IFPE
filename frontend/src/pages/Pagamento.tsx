@@ -20,7 +20,6 @@ const Pagamento: React.FC = () => {
     }
 
     finalizarPedido(formaPagamento);
-    toast.success('Pedido finalizado com sucesso!');
     navigate('/pedidos');
   };
 
@@ -60,8 +59,10 @@ const Pagamento: React.FC = () => {
         >
           <option value="">Selecione...</option>
           <option value="Pix">Pix</option>
-          <option value="Cartão">Cartão</option>
+          <option value="Cartão de Crédito">Cartão de Crédito</option>
+          <option value="Cartão de Débito">Cartão de Débito</option>
           <option value="Dinheiro">Dinheiro</option>
+          <option value="Boleto">Boleto</option>
         </select>
       </div>
 

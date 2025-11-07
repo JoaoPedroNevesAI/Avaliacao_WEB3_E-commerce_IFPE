@@ -19,9 +19,6 @@ export class Produto {
   })
   preco!: number;
 
-  @Column({ default: 0 })
-  estoque!: number;
-
   @ManyToOne(() => Categoria, categoria => categoria.produtos, { nullable: false })
   categoria!: Categoria;
 
@@ -30,5 +27,8 @@ export class Produto {
 
   @Column({ nullable: true })
   imagem!: string;
+
+  @Column({ type: 'int', default: 10 })
+  estoque!: number
 }
 

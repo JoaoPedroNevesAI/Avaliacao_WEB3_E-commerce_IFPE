@@ -12,8 +12,8 @@ import {
   CircularProgress,
 } from '@mui/material';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import { useAppContext } from '../context/AppContext';
-
 
 type Categoria = {
   id: number;
@@ -26,6 +26,7 @@ type Produto = {
   preco: number | string;
   descricao?: string;
   categoria?: { id: number; nome: string };
+  estoque: number;
 };
 
 const Produtos: React.FC = () => {
@@ -34,7 +35,7 @@ const Produtos: React.FC = () => {
   const [busca, setBusca] = useState('');
   const [categoria, setCategoria] = useState<string | number>('');
   const [loading, setLoading] = useState(false);
-  const { adicionarAoCarrinho } = useAppContext();
+  const { adicionarAoCarrinho, carrinho } = useAppContext();
 
   useEffect(() => {
     axios
@@ -63,6 +64,30 @@ const Produtos: React.FC = () => {
     };
     fetchProdutos();
   }, [busca, categoria]);
+
+  const handleAdicionarAoCarrinho = (produto: Produto) => {
+    const itemCarrinho = carrinho.find((item) => item.id === produto.id);
+    const quantidadeAtual = itemCarrinho ? itemCarrinho.quantidade : 0;
+
+    if (produto.estoque <= 0) {
+      toast.error(`"${produto.nome}" está indisponível no momento`);
+      return;
+    }
+
+    if (quantidadeAtual + 1 > produto.estoque) {
+      toast.error(`Estoque insuficiente! Restam apenas ${produto.estoque} unidades.`);
+      return;
+    }
+
+    adicionarAoCarrinho({
+      id: produto.id,
+      nome: produto.nome,
+      preco: typeof produto.preco === 'string' ? Number(produto.preco) : produto.preco,
+      descricao: produto.descricao ?? '',
+      categoria: produto.categoria ?? '',
+      estoque: produto.estoque,
+    });
+  };
 
   return (
     <div style={{ maxWidth: 1000, margin: '20px auto', padding: '0 20px' }}>
@@ -131,27 +156,26 @@ const Produtos: React.FC = () => {
                 <Typography variant="caption" color="text.secondary">
                   Categoria: {p.categoria?.nome || 'Não especificada'}
                 </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  <strong>Estoque:</strong>{' '}
+                  {p.estoque > 0 ? p.estoque : 'Indisponível'}
+                </Typography>
               </CardContent>
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() =>
-                  adicionarAoCarrinho({
-                    id: p.id,
-                    nome: p.nome,
-                    preco: typeof p.preco === 'string' ? Number(p.preco) : p.preco,
-                    descricao: p.descricao ?? '', 
-                    categoria: p.categoria ?? '',
-                  })
-                }
+                onClick={() => handleAdicionarAoCarrinho(p)}
+                disabled={p.estoque <= 0}
                 sx={{
                   borderRadius: 0,
                   textTransform: 'none',
                   fontWeight: 600,
                   py: 1.2,
+                  backgroundColor: p.estoque <= 0 ? '#ccc' : undefined,
+                  '&:hover': { backgroundColor: p.estoque <= 0 ? '#ccc' : undefined },
                 }}
               >
-                Adicionar ao Carrinho
+                {p.estoque > 0 ? 'Adicionar ao Carrinho' : 'Indisponível'}
               </Button>
             </Card>
           ))}

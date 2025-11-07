@@ -7,6 +7,7 @@ type Produto = {
   preco: number;
   descricao?: string;
   categoria?: string | { id: number; nome: string };
+  estoque: number;
 };
 
 export interface ProdutoCarrinho extends Produto {
@@ -23,7 +24,6 @@ export interface Pedido {
 }
 
 export interface AppContextType {
-  produtos: Produto[];
   carrinho: ProdutoCarrinho[];
   pedidos: Pedido[];
   adicionarAoCarrinho: (produto: Produto) => void;
@@ -38,12 +38,6 @@ export interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [produtos] = useState<Produto[]>([
-    { id: 1, nome: 'Camiseta React', descricao: 'Camiseta estilosa de React', preco: 79.9 },
-    { id: 2, nome: 'Caneca TypeScript', descricao: 'Caneca para devs TypeScript', preco: 49.9 },
-    { id: 3, nome: 'Adesivo JavaScript', descricao: 'Adesivo para seu notebook', preco: 9.9 },
-  ]);
-
   const [carrinho, setCarrinho] = useState<ProdutoCarrinho[]>(() => {
     const saved = localStorage.getItem('carrinho');
     return saved ? JSON.parse(saved) : [];
@@ -63,42 +57,86 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [pedidos]);
 
   const adicionarAoCarrinho = (produto: Produto) => {
+    let mensagem = '';
+
     setCarrinho(prev => {
       const existente = prev.find(p => p.id === produto.id);
+
+      if (produto.estoque <= 0) {
+        mensagem = `Produto "${produto.nome}" está indisponível.`;
+        return prev;
+      }
+
       if (existente) {
-        toast.success(`Quantidade aumentada: ${produto.nome}`);
+        if (existente.quantidade >= produto.estoque) {
+          mensagem = `Estoque insuficiente para ${produto.nome}.`;
+          return prev;
+        }
+        mensagem = `Quantidade aumentada: ${produto.nome}`;
         return prev.map(p =>
           p.id === produto.id ? { ...p, quantidade: p.quantidade + 1 } : p
         );
       }
-      toast.success(`Adicionado ao carrinho: ${produto.nome}`);
+
+      mensagem = `Adicionado ao carrinho: ${produto.nome}`;
       return [...prev, { ...produto, quantidade: 1 }];
     });
+
+    if (mensagem.includes('indisponível') || mensagem.includes('insuficiente')) {
+      toast.error(mensagem);
+    } else {
+      toast.success(mensagem);
+    }
   };
 
   const removerDoCarrinho = (id: number) => {
     const removido = carrinho.find(p => p.id === id);
-    if (removido) toast.error(`Removido do carrinho: ${removido.nome}`);
     setCarrinho(prev => prev.filter(p => p.id !== id));
+    if (removido) toast.error(`Removido do carrinho: ${removido.nome}`);
   };
 
   const aumentarQuantidade = (id: number) => {
+    let mensagem = '';
+
     setCarrinho(prev =>
-      prev.map(p => (p.id === id ? { ...p, quantidade: p.quantidade + 1 } : p))
+      prev.map(p => {
+        if (p.id === id) {
+          if (p.quantidade >= p.estoque) {
+            mensagem = `Estoque insuficiente para ${p.nome}.`;
+            return p;
+          }
+          mensagem = `Quantidade aumentada: ${p.nome}`;
+          return { ...p, quantidade: p.quantidade + 1 };
+        }
+        return p;
+      })
     );
+
+    if (mensagem) {
+      if (mensagem.includes('insuficiente')) toast.error(mensagem);
+      else toast.success(mensagem);
+    }
   };
 
   const diminuirQuantidade = (id: number) => {
-    setCarrinho(prev =>
-      prev
-        .map(p => (p.id === id ? { ...p, quantidade: p.quantidade - 1 } : p))
-        .filter(p => p.quantidade > 0)
-    );
+    let removido = '';
+    setCarrinho(prev => {
+      const novo = prev
+        .map(p => {
+          if (p.id === id) {
+            if (p.quantidade === 1) removido = p.nome;
+            return { ...p, quantidade: p.quantidade - 1 };
+          }
+          return p;
+        })
+        .filter(p => p.quantidade > 0);
+      return novo;
+    });
+
+    if (removido) toast.error(`Removido do carrinho: ${removido}`);
   };
 
-  const limparCarrinho = () => {
-    setCarrinho([]);
-  };
+  const limparCarrinho = () => setCarrinho([]);
 
   const finalizarPedido = (formaPagamento: string) => {
     if (carrinho.length === 0) {
@@ -117,7 +155,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       itens: carrinho,
       total,
       formaPagamento,
-      status: 'Aguardando Pagamento',
+      status: 'Finalizado',
     };
 
     setPedidos(prev => [...prev, novoPedido]);
@@ -127,9 +165,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const cancelarPedido = (id: number) => {
     setPedidos(prev =>
-      prev.map(p =>
-        p.id === id ? { ...p, status: 'Cancelado' } : p
-      )
+      prev.map(p => (p.id === id ? { ...p, status: 'Cancelado' } : p))
     );
     toast.error('Pedido cancelado!');
   };
@@ -137,7 +173,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   return (
     <AppContext.Provider
       value={{
-        produtos,
         carrinho,
         pedidos,
         adicionarAoCarrinho,
@@ -156,6 +191,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
 export const useAppContext = (): AppContextType => {
   const context = useContext(AppContext);
-  if (!context) throw new Error('useAppContext deve ser usado dentro de um AppProvider');
+  if (!context)
+    throw new Error('useAppContext deve ser usado dentro de um AppProvider');
   return context;
 };
