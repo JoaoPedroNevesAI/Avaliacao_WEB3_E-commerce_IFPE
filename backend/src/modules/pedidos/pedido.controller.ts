@@ -1,8 +1,19 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, ParseIntPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  ParseIntPipe,
+  BadRequestException,
+} from '@nestjs/common';
 import { PedidoService } from './pedido.service';
 import { CreatePedidoDto } from './dto/create-pedido.dto';
 import { UpdatePedidoDto } from './dto/update-pedido.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { StatusPedido } from './pedido.entity';
 
 @ApiTags('pedidos')
 @Controller('pedidos')
@@ -37,5 +48,20 @@ export class PedidoController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.pedidoService.remove(id);
+  }
+
+  @Patch(':id/cancelar')
+  async cancelarPedido(@Param('id', ParseIntPipe) id: number) {
+    const pedido = await this.pedidoService.findOne(id);
+
+    if (pedido.status === StatusPedido.PAGO) {
+      throw new BadRequestException('Pedido pago não pode ser cancelado');
+    }
+
+    if (pedido.status === StatusPedido.CANCELADO) {
+      throw new BadRequestException('Pedido já está cancelado');
+    }
+
+    return this.pedidoService.update(id, { status: StatusPedido.CANCELADO });
   }
 }

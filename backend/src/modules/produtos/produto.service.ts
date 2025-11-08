@@ -36,7 +36,7 @@ export class ProdutoService {
     }
 
     if (filtro?.nome) {
-      query.andWhere('produto.nome ILIKE :nome', {
+      query.andWhere('produto.nome LIKE :nome', {
         nome: `%${filtro.nome}%`,
       });
     }

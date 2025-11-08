@@ -10,6 +10,8 @@ import {
   CardContent,
   Typography,
   CircularProgress,
+  Dialog,
+  CardMedia,
 } from '@mui/material';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -27,6 +29,7 @@ type Produto = {
   descricao?: string;
   categoria?: { id: number; nome: string };
   estoque: number;
+  imagem?: string;
 };
 
 const Produtos: React.FC = () => {
@@ -36,6 +39,7 @@ const Produtos: React.FC = () => {
   const [categoria, setCategoria] = useState<string | number>('');
   const [loading, setLoading] = useState(false);
   const { adicionarAoCarrinho, carrinho } = useAppContext();
+  const [imagemAberta, setImagemAberta] = useState<string | null>(null);
 
   useEffect(() => {
     axios
@@ -143,6 +147,30 @@ const Produtos: React.FC = () => {
                 justifyContent: 'space-between',
               }}
             >
+              {p.imagem && (
+                <CardMedia
+                  component="img"
+                  image={`http://localhost:3000${p.imagem}`}
+                  alt={p.nome}
+                  onClick={() => setImagemAberta(`http://localhost:3000${p.imagem}`)}
+                  sx={{
+                    width: '100%',
+                    height: 200,
+                    objectFit: 'contain',
+                    backgroundColor: '#fafafa',
+                    borderBottom: '1px solid #eee',
+                    borderTopLeftRadius: '12px',
+                    borderTopRightRadius: '12px',
+                    padding: '10px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.3s ease',
+                    '&:hover': {
+                      transform: 'scale(1.03)',
+                    },
+                  }}
+                />
+              )}
+
               <CardContent>
                 <Typography variant="h6" gutterBottom>
                   {p.nome}
@@ -161,6 +189,7 @@ const Produtos: React.FC = () => {
                   {p.estoque > 0 ? p.estoque : 'Indisponível'}
                 </Typography>
               </CardContent>
+
               <Button
                 variant="contained"
                 color="primary"
@@ -181,6 +210,25 @@ const Produtos: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* Modal da imagem ampliada */}
+      <Dialog
+        open={!!imagemAberta}
+        onClose={() => setImagemAberta(null)}
+        maxWidth="md"
+      >
+        {imagemAberta && (
+          <img
+            src={imagemAberta}
+            alt="Visualização do produto"
+            style={{
+              width: '100%',
+              height: 'auto',
+              objectFit: 'contain',
+            }}
+          />
+        )}
+      </Dialog>
     </div>
   );
 };
