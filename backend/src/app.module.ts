@@ -13,12 +13,12 @@ import { CarrinhoModule } from './modules/carrinho/carrinho.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'postgres',
+      type: 'mysql',
       host: 'localhost',
-      port: 5432,
-      username: 'postgres',
+      port: 3306,
+      username: 'root',
       password: 'Sonic2005#', 
-      database: 'Avaliacao1', 
+      database: 'avaliacao1', 
       autoLoadEntities: true, 
       synchronize: true, 
     }),

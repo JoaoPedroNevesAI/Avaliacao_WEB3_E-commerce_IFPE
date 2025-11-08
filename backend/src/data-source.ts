@@ -9,12 +9,12 @@ import { Endereco } from './modules/enderecos/endereco.entity';
 import { Pagamento } from './modules/pagamentos/pagamento.entity';
 
 export const AppDataSource = new DataSource({
-  type: 'postgres',
+  type: 'mysql',
   host: 'localhost',
-  port: 5432,
-  username: 'postgres',
+  port: 3306,
+  username: 'root',
   password: 'Sonic2005#',
-  database: 'Avaliacao1',
+  database: 'avaliacao1',
   synchronize: true,
   logging: false,
   entities: [

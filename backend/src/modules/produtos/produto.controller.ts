@@ -10,11 +10,17 @@ import {
   ParseIntPipe,
   BadRequestException,
   NotFoundException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { ProdutoService } from './produto.service';
 import { CreateProdutoDto } from './dto/create-produto.dto';
 import { UpdateProdutoDto } from './dto/update-produto.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import * as fs from 'fs';
 
 @ApiTags('produtos')
 @Controller('produtos')
@@ -47,10 +53,7 @@ export class ProdutoController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateProdutoDto,
-  ) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateProdutoDto) {
     return this.produtoService.update(id, dto);
   }
 
@@ -59,37 +62,44 @@ export class ProdutoController {
     return this.produtoService.remove(id);
   }
 
-  @Get(':id/estoque')
-  async verificarEstoque(@Param('id', ParseIntPipe) id: number) {
-    const produto = await this.produtoService.findOne(id);
-    if (!produto) throw new NotFoundException('Produto não encontrado');
-    if (produto.estoque <= 0)
-      throw new BadRequestException('Produto sem estoque');
-    return { disponivel: true, estoque: produto.estoque };
-  }
-
-  @Patch(':id/reduzir-estoque')
-  async reduzirEstoque(
+  /**
+   * Upload de imagem e vinculação ao produto
+   */
+  @Patch(':id/imagem')
+  @UseInterceptors(
+    FileInterceptor('imagem', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const dir = './uploads';
+          // Garante que a pasta existe
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir);
+          }
+          cb(null, dir);
+        },
+        filename: (req, file, cb) => {
+          const uniqueName =
+            Date.now() + '-' + Math.round(Math.random() * 1e9) + extname(file.originalname);
+          cb(null, uniqueName);
+        },
+      }),
+    }),
+  )
+  async uploadImagem(
     @Param('id', ParseIntPipe) id: number,
-    @Body('quantidade') quantidade: number,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    if (!quantidade || quantidade <= 0) {
-      throw new BadRequestException('Quantidade inválida');
-    }
+    if (!file) throw new BadRequestException('Nenhum arquivo enviado');
 
     const produto = await this.produtoService.findOne(id);
     if (!produto) throw new NotFoundException('Produto não encontrado');
 
-    if (produto.estoque < quantidade) {
-      throw new BadRequestException('Estoque insuficiente');
-    }
-
-    const novoEstoque = produto.estoque - quantidade;
-    await this.produtoService.update(id, { estoque: novoEstoque });
+    const imagemUrl = `/uploads/${file.filename}`;
+    await this.produtoService.update(id, { imagem: imagemUrl });
 
     return {
-      message: `Estoque atualizado com sucesso! Novo estoque: ${novoEstoque}`,
-      novoEstoque,
+      message: 'Imagem enviada e vinculada ao produto com sucesso!',
+      imagemUrl,
     };
   }
 }

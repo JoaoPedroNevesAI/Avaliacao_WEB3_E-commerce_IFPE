@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "moduleResolution": "node",
-    "types": ["node"],
+    "types": ["node", "jest"],
     "target": "ES2021",
     "lib": ["ES2021"],
     "esModuleInterop": true,
@@ -18,7 +18,7 @@
     "outDir": "./dist",
     "sourceMap": true,
     "baseUrl": "./",
-    "incremental": true
+    "incremental": true,
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

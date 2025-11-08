@@ -22,63 +22,88 @@ export class PedidoService {
   ) {}
 
   async findAll() {
-    return this.pedidoRepo.find({ relations: ['cliente', 'itens', 'itens.produto'] });
+    return this.pedidoRepo.find({
+      relations: ['cliente', 'itens', 'itens.produto'],
+    });
   }
 
   async findByCliente(clienteId: number) {
     const cliente = await this.clienteRepo.findOne({ where: { id: clienteId } });
     if (!cliente) throw new NotFoundException('Cliente não encontrado');
-    return this.pedidoRepo.find({ where: { cliente }, relations: ['itens', 'itens.produto'] });
+    return this.pedidoRepo.find({
+      where: { cliente },
+      relations: ['itens', 'itens.produto'],
+    });
   }
 
   async findOne(id: number) {
-    const pedido = await this.pedidoRepo.findOne({ where: { id }, relations: ['cliente', 'itens', 'itens.produto'] });
+    const pedido = await this.pedidoRepo.findOne({
+      where: { id },
+      relations: ['cliente', 'itens', 'itens.produto'],
+    });
     if (!pedido) throw new NotFoundException('Pedido não encontrado');
     return pedido;
   }
 
-  async create(dto: CreatePedidoDto) {
-    const cliente = await this.clienteRepo.findOne({ where: { id: dto.clienteId } });
-    if (!cliente) throw new NotFoundException('Cliente não encontrado');
+async create(dto: CreatePedidoDto) {
+  const cliente = await this.clienteRepo.findOne({ where: { id: dto.clienteId } });
+  if (!cliente) throw new NotFoundException('Cliente não encontrado');
 
-    const pedido = new Pedido();
-    pedido.cliente = cliente;
-    pedido.status = StatusPedido.ABERTO;
-    pedido.itens = [];
+  const pedido = new Pedido();
+  pedido.cliente = cliente;
+  pedido.status = StatusPedido.ABERTO;
+  pedido.itens = [];
 
-    let subtotal = 0;
-    let quantidadeTotal = 0;
+  let subtotal = 0;
+  let quantidadeTotal = 0;
 
-    for (const itemDto of dto.itens) {
-      const produto = await this.produtoRepo.findOne({ where: { id: itemDto.produtoId } });
-      if (!produto) throw new NotFoundException(`Produto ${itemDto.produtoId} não encontrado`);
-      if (!produto.ativo) throw new BadRequestException(`Produto ${produto.nome} inativo`);
-      if (produto.estoque < itemDto.quantidade) throw new BadRequestException(`Estoque insuficiente para ${produto.nome}`);
+  for (const itemDto of dto.itens) {
+    const produto = await this.produtoRepo.findOne({ where: { id: itemDto.produtoId } });
+    if (!produto) throw new NotFoundException(`Produto ${itemDto.produtoId} não encontrado`);
+    if (!produto.ativo) throw new BadRequestException(`Produto ${produto.nome} inativo`);
+    if (produto.estoque < itemDto.quantidade) throw new BadRequestException(`Estoque insuficiente para ${produto.nome}`);
 
-      const item = new ItemPedido();
-      item.produto = produto;
-      item.quantidade = itemDto.quantidade;
-      item.precoUnitario = Number(produto.preco);
-      item.subtotal = Number(produto.preco) * itemDto.quantidade;
-      item.pedido = pedido;
+    produto.estoque -= itemDto.quantidade;
+    await this.produtoRepo.save(produto);
 
-      pedido.itens.push(item);
+    const item = new ItemPedido();
+    item.produto = produto;
+    item.quantidade = itemDto.quantidade;
+    item.precoUnitario = Number(produto.preco);
+    item.subtotal = Number(produto.preco) * itemDto.quantidade;
+    item.pedido = pedido;
 
-      subtotal += item.subtotal;
-      quantidadeTotal += item.quantidade;
-    }
+    pedido.itens.push(item);
 
-    pedido.subtotal = subtotal;
-    pedido.total = subtotal;
-    pedido.quantidadeTotal = quantidadeTotal;
-
-    return this.pedidoRepo.save(pedido);
+    subtotal += item.subtotal;
+    quantidadeTotal += item.quantidade;
   }
+
+  pedido.subtotal = subtotal;
+  pedido.total = subtotal;
+  pedido.quantidadeTotal = quantidadeTotal;
+
+  const pedidoSalvo = await this.pedidoRepo.save(pedido);
+
+  return {
+    message: 'Pedido criado com sucesso!',
+    pedido: pedidoSalvo,
+  };
+}
+
 
   async update(id: number, dto: UpdatePedidoDto) {
     const pedido = await this.findOne(id);
+
     if (pedido.status === StatusPedido.PAGO) {
       throw new BadRequestException('Pedido pago não pode ser alterado');
+    }
+
+    if (dto.status === StatusPedido.CANCELADO) {
+      for (const item of pedido.itens) {
+        item.produto.estoque += item.quantidade;
+        await this.produtoRepo.save(item.produto);
+      }
     }
 
     if (dto.status) {
