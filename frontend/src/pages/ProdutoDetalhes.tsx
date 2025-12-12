@@ -16,7 +16,7 @@ type Produto = {
 
 const ProdutoDetalhes: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { adicionarAoCarrinho } = useAppContext();
+  const { adicionarItem } = useAppContext();
   const [produto, setProduto] = useState<Produto | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,7 +45,7 @@ const ProdutoDetalhes: React.FC = () => {
   if (!produto) return <p style={{ textAlign: 'center', marginTop: 40 }}>Produto não encontrado.</p>;
 
   const handleAdicionar = () => {
-    adicionarAoCarrinho(produto);
+    adicionarItem(produto);
   };
 
   return (

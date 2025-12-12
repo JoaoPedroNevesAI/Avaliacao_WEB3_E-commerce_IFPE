@@ -5,13 +5,13 @@ import { ItemPedido } from '../pedidos/item-pedido.entity';
 import { Cliente } from '../clientes/cliente.entity';
 import { Produto } from '../produtos/produto.entity';
 import { PedidoService } from './pedido.service';
-import { PedidoController }from './pedido.controller';
+import { PedidosController }from './pedido.controller';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Pedido, ItemPedido, Cliente, Produto]),
   ],
-  controllers: [PedidoController],
+  controllers: [PedidosController],
   providers: [PedidoService],
 })
 export class PedidosModule {}

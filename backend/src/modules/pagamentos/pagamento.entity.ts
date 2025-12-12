@@ -13,7 +13,7 @@ export enum StatusPagamento {
   CANCELADO = 'CANCELADO',
 }
 
-@Entity()
+@Entity('pagamento')
 export class Pagamento {
   @PrimaryGeneratedColumn()
   id!: number;

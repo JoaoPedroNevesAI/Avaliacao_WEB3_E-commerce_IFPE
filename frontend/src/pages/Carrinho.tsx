@@ -1,79 +1,45 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '../context/AppContext';
+import { useContext } from "react";
+import { AppContext } from "../context/AppContext";
+import { useNavigate } from "react-router-dom";
 
-const Carrinho: React.FC = () => {
+export default function Carrinho() {
   const {
-    carrinho,
-    removerDoCarrinho,
-    limparCarrinho,
+    pedido,
     aumentarQuantidade,
-    diminuirQuantidade,
-  } = useAppContext();
+    diminuirQuantidade
+  } = useContext(AppContext);
 
   const navigate = useNavigate();
 
-  const total = carrinho.reduce(
-    (acc, item) => acc + item.preco * item.quantidade,
+  const total = pedido.reduce(
+    (s, item) => s + item.preco * item.quantidade,
     0
   );
 
-  const irParaPagamento = () => {
-    if (carrinho.length === 0) {
-      alert('Seu carrinho está vazio.');
-      return;
-    }
-    navigate('/pagamento');
-  };
-
   return (
-    <div style={{ maxWidth: 800, margin: '20px auto' }}>
-      <h1>Meu Carrinho</h1>
-      {carrinho.length === 0 ? (
-        <p>Seu carrinho está vazio.</p>
-      ) : (
+    <div>
+      <h2>Carrinho</h2>
+
+      {pedido.length === 0 && <p>Seu carrinho está vazio.</p>}
+
+      {pedido.map((item) => (
+        <div key={item.produtoId}>
+          <p>
+            {item.nome} — R$ {item.preco} — qtd: {item.quantidade}
+          </p>
+          <button onClick={() => diminuirQuantidade(item.produtoId)}>-</button>
+          <button onClick={() => aumentarQuantidade(item.produtoId)}>+</button>
+        </div>
+      ))}
+
+      {pedido.length > 0 && (
         <>
-          {carrinho.map(item => (
-            <div
-              key={item.id}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                borderBottom: '1px solid #ccc',
-                padding: '10px 0',
-              }}
-            >
-              <div>
-                <strong>{item.nome}</strong>
-                <p>
-                  R$ {Number(item.preco).toFixed(2)} x {item.quantidade} = R${' '}
-                  {(item.preco * item.quantidade).toFixed(2)}
-                </p>
-              </div>
-              <div>
-                <button onClick={() => diminuirQuantidade(item.id)}>-</button>
-                <button onClick={() => aumentarQuantidade(item.id)}>+</button>
-                <button
-                  onClick={() => removerDoCarrinho(item.id)}
-                  style={{ marginLeft: 5 }}
-                >
-                  Remover
-                </button>
-              </div>
-            </div>
-          ))}
           <h3>Total: R$ {total.toFixed(2)}</h3>
-          <div style={{ marginTop: 20 }}>
-            <button onClick={irParaPagamento}>Ir para Pagamento</button>
-            <button onClick={limparCarrinho} style={{ marginLeft: 10 }}>
-              Limpar Carrinho
-            </button>
-          </div>
+          <button onClick={() => navigate("/pagamento")}>
+            Finalizar Pedido
+          </button>
         </>
       )}
     </div>
   );
-};
-
-export default Carrinho;
+}

@@ -4,7 +4,7 @@ import { ItemPedido } from '../modules/pedidos/item-pedido.entity';
 import { Cliente } from '../modules/clientes/cliente.entity';
 import { Produto } from '../modules/produtos/produto.entity';
 
-const round2 = (num: number) => Math.round(num * 100) / 100; // arredonda para 2 casas decimais
+const round2 = (num: number) => Math.round(num * 100) / 100;
 
 export const seedPedidos = async (dataSource: DataSource) => {
   const pedidoRepo = dataSource.getRepository(Pedido);
@@ -57,5 +57,4 @@ export const seedPedidos = async (dataSource: DataSource) => {
   pedido2.itens = [item3];
 
   await pedidoRepo.save([pedido1, pedido2]);
-  console.log('Seed de pedidos executada com sucesso!');
 };
