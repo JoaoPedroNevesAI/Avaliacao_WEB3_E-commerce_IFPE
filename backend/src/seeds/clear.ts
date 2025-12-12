@@ -9,7 +9,6 @@ const clearDatabase = async () => {
     await repository.query(`TRUNCATE TABLE "${entity.tableName}" RESTART IDENTITY CASCADE;`);
   }
 
-  console.log('Banco limpo com sucesso!');
   await connection.destroy();
 };
 

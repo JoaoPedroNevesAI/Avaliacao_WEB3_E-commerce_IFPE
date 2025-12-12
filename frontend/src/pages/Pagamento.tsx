@@ -1,103 +1,74 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '../context/AppContext';
-import toast from 'react-hot-toast';
+import { useContext, useState } from "react";
+import { AppContext } from "../context/AppContext";
+import { useNavigate } from "react-router-dom";
 
-const Pagamento: React.FC = () => {
-  const { carrinho, finalizarPedido, limparCarrinho } = useAppContext();
+export default function Pagamento() {
+  const { pedido, finalizarPedido } = useContext(AppContext);
   const navigate = useNavigate();
-  const [formaPagamento, setFormaPagamento] = useState('');
 
-  const total = carrinho.reduce(
-    (acc, item) => acc + item.preco * item.quantidade,
+  const [metodo, setMetodo] = useState("cartao");
+
+  const total = pedido.reduce(
+    (s, item) => s + item.preco * item.quantidade,
     0
   );
 
-  const handleFinalizar = () => {
-    if (!formaPagamento) {
-      toast.error('Selecione uma forma de pagamento.');
-      return;
-    }
-
-    finalizarPedido(formaPagamento);
-    navigate('/pedidos');
-  };
-
-  const handleCancelar = () => {
-    limparCarrinho();
-    toast.error('Pedido cancelado.');
-    navigate('/produtos');
+  const confirmar = async () => {
+    await finalizarPedido(metodo);
+    navigate("/pedidos");
   };
 
   return (
-    <div style={{ maxWidth: 800, margin: '20px auto' }}>
-      <h1>Pagamento</h1>
+    <div>
+      <h2>Pagamento</h2>
 
-      <h3>Resumo da Compra</h3>
-      {carrinho.length === 0 ? (
-        <p>Seu carrinho está vazio.</p>
-      ) : (
-        <>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {carrinho.map((item) => (
-              <li key={item.id}>
-                {item.nome} — {item.quantidade} x R$ {item.preco.toFixed(2)} = R${' '}
-                {(item.preco * item.quantidade).toFixed(2)}
-              </li>
-            ))}
-          </ul>
-          <h3>Total: R$ {total.toFixed(2)}</h3>
-        </>
-      )}
+      {pedido.map((item) => (
+        <p key={item.produtoId}>
+          {item.quantidade}x {item.nome} — R$ {item.preco}
+        </p>
+      ))}
 
-      <div style={{ marginTop: 20 }}>
-        <h3>Forma de Pagamento</h3>
-        <select
-          value={formaPagamento}
-          onChange={(e) => setFormaPagamento(e.target.value)}
-          style={{ padding: 8, fontSize: 16 }}
-        >
-          <option value="">Selecione...</option>
-          <option value="Pix">Pix</option>
-          <option value="Cartão de Crédito">Cartão de Crédito</option>
-          <option value="Cartão de Débito">Cartão de Débito</option>
-          <option value="Dinheiro">Dinheiro</option>
-          <option value="Boleto">Boleto</option>
-        </select>
-      </div>
+      <h3>Total: R$ {total.toFixed(2)}</h3>
 
-      <div style={{ marginTop: 20 }}>
-        <button
-          onClick={handleFinalizar}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-        >
-          Finalizar Pedido
-        </button>
+      <h3>Escolha o método de pagamento:</h3>
 
-        <button
-          onClick={handleCancelar}
-          style={{
-            marginLeft: 10,
-            padding: '10px 20px',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: 5,
-            cursor: 'pointer',
-          }}
-        >
-          Cancelar Pedido
-        </button>
-      </div>
+      <label>
+        <input
+          type="radio"
+          value="cartao"
+          checked={metodo === "cartao"}
+          onChange={(e) => setMetodo(e.target.value)}
+        />
+        Cartão
+      </label>
+
+      <br />
+
+      <label>
+        <input
+          type="radio"
+          value="pix"
+          checked={metodo === "pix"}
+          onChange={(e) => setMetodo(e.target.value)}
+        />
+        Pix
+      </label>
+
+      <br />
+
+      <label>
+        <input
+          type="radio"
+          value="dinheiro"
+          checked={metodo === "dinheiro"}
+          onChange={(e) => setMetodo(e.target.value)}
+        />
+        Dinheiro
+      </label>
+
+      <br /><br />
+
+      <button onClick={confirmar}>Confirmar Pagamento</button>
     </div>
   );
-};
-
-export default Pagamento;
+}

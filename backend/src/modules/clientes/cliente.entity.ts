@@ -22,6 +22,9 @@ export class Cliente {
   @CreateDateColumn()
   dataCadastro!: Date;
 
+    @Column({ default: 'cliente' })
+  role!: string;
+
   @OneToMany(() => Endereco, endereco => endereco.cliente)
   enderecos!: Endereco[];
 

@@ -34,9 +34,4 @@ export class ClienteController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.clienteService.remove(id);
   }
-
-  @Post('login')
-  login(@Body() dto: LoginDto) {
-    return this.clienteService.login(dto);
-  }
 }

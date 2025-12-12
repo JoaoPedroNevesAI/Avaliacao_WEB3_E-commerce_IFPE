@@ -1,67 +1,28 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Param,
-  Body,
-  ParseIntPipe,
-  BadRequestException,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Delete } from '@nestjs/common';
 import { PedidoService } from './pedido.service';
 import { CreatePedidoDto } from './dto/create-pedido.dto';
-import { UpdatePedidoDto } from './dto/update-pedido.dto';
-import { ApiTags } from '@nestjs/swagger';
-import { StatusPedido } from './pedido.entity';
 
-@ApiTags('pedidos')
 @Controller('pedidos')
-export class PedidoController {
-  constructor(private readonly pedidoService: PedidoService) {}
+export class PedidosController {
+  constructor(private readonly pedidosService: PedidoService) {}
 
   @Get()
   findAll() {
-    return this.pedidoService.findAll();
-  }
-
-  @Get('cliente/:clienteId')
-  findByCliente(@Param('clienteId', ParseIntPipe) clienteId: number) {
-    return this.pedidoService.findByCliente(clienteId);
+    return this.pedidosService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.pedidoService.findOne(id);
+  findOne(@Param('id') id: number) {
+    return this.pedidosService.findOne(id);
   }
 
   @Post()
   create(@Body() dto: CreatePedidoDto) {
-    return this.pedidoService.create(dto);
-  }
-
-  @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdatePedidoDto) {
-    return this.pedidoService.update(id, dto);
+    return this.pedidosService.create(dto);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.pedidoService.remove(id);
-  }
-
-  @Patch(':id/cancelar')
-  async cancelarPedido(@Param('id', ParseIntPipe) id: number) {
-    const pedido = await this.pedidoService.findOne(id);
-
-    if (pedido.status === StatusPedido.PAGO) {
-      throw new BadRequestException('Pedido pago não pode ser cancelado');
-    }
-
-    if (pedido.status === StatusPedido.CANCELADO) {
-      throw new BadRequestException('Pedido já está cancelado');
-    }
-
-    return this.pedidoService.update(id, { status: StatusPedido.CANCELADO });
+  remove(@Param('id') id: number) {
+    return this.pedidosService.remove(id);
   }
 }

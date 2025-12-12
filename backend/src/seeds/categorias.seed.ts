@@ -3,10 +3,6 @@ import { Categoria } from '../modules/categorias/categoria.entity';
 
 export const seedCategorias = async (dataSource: DataSource) => {
   const categoriaRepository = dataSource.getRepository(Categoria);
-
-  const categoriasExistentes = await categoriaRepository.count();
-  if (categoriasExistentes > 0) return;
-
   const categoriasSeed = [
     { nome: 'Tecnologia', descricao: 'Produtos eletrônicos e gadgets.' },
     { nome: 'Higiene', descricao: 'Produtos de higiene pessoal.' },
@@ -15,5 +11,4 @@ export const seedCategorias = async (dataSource: DataSource) => {
   ];
 
   await categoriaRepository.save(categoriasSeed);
-  console.log('Seed de categorias executada com sucesso!');
 };

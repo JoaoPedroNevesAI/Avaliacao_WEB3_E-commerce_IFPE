@@ -9,6 +9,7 @@ import { EnderecosModule } from './modules/enderecos/enderecos.module';
 import { PedidosModule } from './modules/pedidos/pedidos.module';
 import { PagamentosModule } from './modules/pagamentos/pagamento.module';
 import { CarrinhoModule } from './modules/carrinho/carrinho.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { CarrinhoModule } from './modules/carrinho/carrinho.module';
     PedidosModule,
     PagamentosModule,
     CarrinhoModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

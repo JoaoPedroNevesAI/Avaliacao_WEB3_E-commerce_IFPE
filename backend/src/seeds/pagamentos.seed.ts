@@ -20,5 +20,4 @@ export const seedPagamentos = async (dataSource: DataSource) => {
   }));
 
   await pagamentoRepo.save(pagamentosSeed);
-  console.log('Seed de pagamentos executada com sucesso!');
 };

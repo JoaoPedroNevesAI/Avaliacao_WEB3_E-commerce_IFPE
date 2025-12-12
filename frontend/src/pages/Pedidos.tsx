@@ -1,63 +1,51 @@
-import React from 'react';
-import { useAppContext, Pedido } from '../context/AppContext';
+import { useContext } from "react";
+import { AppContext } from "../context/AppContext";
 
-const Pedidos: React.FC = () => {
-  const { pedidos, cancelarPedido } = useAppContext();
+export default function Pedidos() {
+  const { pedidos, cancelarPedido } = useContext(AppContext);
+
+  // Cálculo seguro do total baseado nos itens do pedido
+  const calcularTotal = (pedido: any) => {
+    if (!pedido.itens) return 0;
+
+    return pedido.itens.reduce((acc: number, item: any) => {
+      const preco = Number(item.preco ?? 0);
+      const qtd = Number(item.quantidade ?? 1);
+      return acc + preco * qtd;
+    }, 0);
+  };
 
   return (
-    <div style={{ maxWidth: 800, margin: '20px auto' }}>
-      <h1>Meus Pedidos</h1>
-      {pedidos.length === 0 ? (
-        <p>Você ainda não fez nenhum pedido.</p>
-      ) : (
-        pedidos.map((pedido: Pedido) => (
-          <div
-            key={pedido.id}
-            style={{
-              border: '1px solid #ccc',
-              padding: 20,
-              marginBottom: 20,
-              borderRadius: 8,
-              backgroundColor: '#fafafa',
-            }}
-          >
-            <h3>Pedido #{pedido.id}</h3>
-            <p><strong>Data:</strong> {pedido.data}</p>
-            <p><strong>Forma de pagamento:</strong> {pedido.formaPagamento}</p>
-            <p><strong>Status:</strong> {pedido.status}</p>
+    <div>
+      <h2>Pedidos</h2>
 
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              {pedido.itens.map(item => (
-                <li key={item.id}>
-                  {item.nome} — {item.quantidade} x R$ {item.preco.toFixed(2)} = R${' '}
-                  {(item.preco * item.quantidade).toFixed(2)}
-                </li>
-              ))}
-            </ul>
+      {pedidos.length === 0 && <p>Nenhum pedido realizado.</p>}
 
-            <h4>Total: R$ {pedido.total.toFixed(2)}</h4>
+      {pedidos.map((p: any) => (
+        <div
+          key={p.id}
+          style={{ border: "1px solid #aaa", padding: 10, margin: 10 }}
+        >
+          <p>ID: {p.id}</p>
 
-            {pedido.status === 'Aguardando Pagamento' && (
-              <button
-                onClick={() => cancelarPedido(pedido.id)}
-                style={{
-                  marginTop: 10,
-                  padding: '8px 14px',
-                  border: 'none',
-                  borderRadius: 5,
-                  backgroundColor: '#d9534f',
-                  color: 'white',
-                  cursor: 'pointer',
-                }}
-              >
-                Cancelar Pedido
-              </button>
-            )}
-          </div>
-        ))
-      )}
+          <p>
+            Valor Total: R$ {calcularTotal(p).toFixed(2)}
+          </p>
+
+          <p>Método: {p.metodo ?? "Não selecionado"}</p>
+
+          <h4>Itens:</h4>
+          {p.itens?.map((i: any) => (
+            <p key={i.produtoId}>
+              {i.quantidade}x {i.nome} — R$ {Number(i.preco ?? 0).toFixed(2)}
+            </p>
+          ))}
+
+          <button onClick={() => cancelarPedido(p.id)}>
+            Cancelar Pedido
+          </button>
+        </div>
+      ))}
     </div>
   );
-};
-
-export default Pedidos;
+}
